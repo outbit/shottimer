@@ -1,0 +1,2826 @@
+
+
+HI-TECH Software PICC Macro Assembler V9.50PL2
+                                                      Wed Aug 12 00:09:07 2009
+
+
+     1                           	processor	16F88
+     2                           	opt	pw 79
+     3                           	psect	text0,local,class=CODE,delta=2
+     4                           	psect	config,global,class=CONFIG,delta=2
+     5                           	psect	intcode,global,class=CODE,delta=2
+     6                           	psect	intsave_0,global,ovrld,class=COMBANK,spa
+      +                          ce=1,delta=1
+     7                           	psect	intret,global,class=CODE,delta=2
+     8                           	psect	intentry,global,class=CODE,delta=2
+     9                           	psect	intsave,global,class=BANK0,space=1,delta
+      +                          =1
+    10                           	psect	text1,local,class=CODE,delta=2
+    11                           	psect	text2,local,class=CODE,delta=2
+    12                           	psect	text4,local,class=CODE,delta=2
+    13                           	psect	text5,local,class=CODE,delta=2
+    14                           	psect	strings,global,class=STRING,delta=2
+    15                           	psect	rbss_0,global,class=BANK0,space=1,delta=
+      +                          1
+    16                           	psect	rbss_1,global,class=BANK1,space=1,delta=
+      +                          1
+    17                           	psect	temp,global,ovrld,class=BANK0,space=1,de
+      +                          lta=1
+    18  0000                     
+    19  0000                     
+    20  0000                     
+    21  0000                     
+    22  0000                     
+    23  0000                     
+    24  0000                     
+    25  0000                     
+    26  0000                     
+    27  0000                     	;#
+    28                           
+    29                           	psect	config
+    30  2007  1F0A               	dw	7946	;#
+    31                           
+    32                           	psect	intcode
+    33  000B                     _INT
+    34  000B                     int_func
+    35                           ;ShotTimer.c: 108: void interrupt INT(void)
+    36  000B  1D0B               	btfss	11,2
+    37  000C  281B               	goto	l2
+    38                           ;ShotTimer.c: 111: {
+    39  000D  3055               	movlw	85
+    40  000E  1283               	bcf	3,5
+    41  000F  1303               	bcf	3,6	;carry unused
+    42  0010  07D4               	addwf	_G_TickCount	;volatile
+    43  0011  3001               	movlw	1
+    44  0012  1803               	btfsc	3,0
+    45  0013  07D5               	addwf	_G_TickCount+1	;volatile
+    46  0014  1803               	btfsc	3,0
+    47  0015  07D6               	addwf	_G_TickCount+2	;volatile
+    48  0016  1803               	btfsc	3,0
+    49  0017  07D7               	addwf	_G_TickCount+3	;volatile
+    50                           ;ShotTimer.c: 117: TMR0 -= 255;
+    51  0018  3001               	movlw	-255
+    52  0019  0781               	addwf	1	;volatile
+    53                           ;ShotTimer.c: 118: TMR0IF = 0;
+    54  001A  110B               	bcf	11,2
+    55  001B                     l2
+    56                           ;ShotTimer.c: 119: }
+    57  001B  1C8B               	btfss	11,1
+    58  001C  281F               	goto	l1
+    59                           ;ShotTimer.c: 122: {
+    60  001D  0000               	nop	;#
+    61                           ;ShotTimer.c: 124: INT0IF = 0;
+    62  001E  108B               	bcf	11,1
+    63                           ;ShotTimer.c: 125: }
+    64  001F                     l1
+    65  001F  1303               	bcf	3,6	;carry unused
+    66  0020  1283               	bcf	3,5
+    67                           
+    68                           	psect	intsave_0
+    69  007C                     saved_w
+    70  007C                     	ds	1
+    71                           
+    72                           	psect	intret
+    73  0021  086E               	movf	saved_pclath,w
+    74  0022  008A               	movwf	10
+    75  0023                     int_restore
+    76  0023  086D               	movf	saved_status,w
+    77  0024  0083               	movwf	3
+    78  0025  0EFC               	swapf	saved_w
+    79  0026  0E7C               	swapf	saved_w,w
+    80  0027  0009               	retfie
+    81                           
+    82                           	psect	intentry
+    83  0004                     int_entry
+    84  0004  00FC               	movwf	saved_w
+    85  0005  0803               	movf	3,w
+    86  0006  0183               	clrf	3
+    87  0007  00ED               	movwf	saved_status
+    88  0008  080A               	movf	10,w
+    89  0009  00EE               	movwf	saved_pclath
+    90  000A  018A               	clrf	10
+    91                           
+    92                           	psect	intsave
+    93  006D                     saved_status
+    94  006D                     	ds	1
+    95  006E                     saved_pclath
+    96  006E                     	ds	1
+    97                           
+    98                           	psect	text1
+    99  0C11                     _ResetSettings
+   100                           ;ShotTimer.c: 134: void ResetSettings(void)
+   101  0C11  138B               	bcf	11,7
+   102                           ;ShotTimer.c: 137: G_Setting_Fastest = 0;
+   103  0C12  1283               	bcf	3,5
+   104  0C13  1303               	bcf	3,6	;carry unused
+   105  0C14  01C4               	clrf	_G_Setting_Fastest
+   106  0C15  01C5               	clrf	_G_Setting_Fastest+1
+   107  0C16  01C6               	clrf	_G_Setting_Fastest+2
+   108  0C17  01C7               	clrf	_G_Setting_Fastest+3
+   109                           ;ShotTimer.c: 138: G_Setting_Slowest = 0;
+   110  0C18  01C8               	clrf	_G_Setting_Slowest
+   111  0C19  01C9               	clrf	_G_Setting_Slowest+1
+   112  0C1A  01CA               	clrf	_G_Setting_Slowest+2
+   113  0C1B  01CB               	clrf	_G_Setting_Slowest+3
+   114                           ;ShotTimer.c: 139: G_ShotCount = 0;
+   115  0C1C  01B0               	clrf	_G_ShotCount
+   116  0C1D  01B1               	clrf	_G_ShotCount+1
+   117                           ;ShotTimer.c: 140: G_Minutes = 0;
+   118  0C1E  01A3               	clrf	_G_Minutes
+   119                           ;ShotTimer.c: 141: G_Seconds = 0;
+   120  0C1F  01C0               	clrf	_G_Seconds
+   121  0C20  01C1               	clrf	_G_Seconds+1
+   122  0C21  01C2               	clrf	_G_Seconds+2
+   123  0C22  01C3               	clrf	_G_Seconds+3
+   124                           ;ShotTimer.c: 143: G_Refresh_LastCheck = 0;
+   125  0C23  01BC               	clrf	_G_Refresh_LastCheck
+   126  0C24  01BD               	clrf	_G_Refresh_LastCheck+1
+   127  0C25  01BE               	clrf	_G_Refresh_LastCheck+2
+   128  0C26  01BF               	clrf	_G_Refresh_LastCheck+3
+   129                           ;ShotTimer.c: 145: G_Highest = 0;
+   130  0C27  01A8               	clrf	_G_Highest
+   131  0C28  01A9               	clrf	_G_Highest+1
+   132                           ;ShotTimer.c: 146: G_HighShot = 0;
+   133  0C29  01A1               	clrf	_G_HighShot
+   134                           ;ShotTimer.c: 149: G_TickCount = 0;
+   135  0C2A  01D4               	clrf	_G_TickCount	;volatile
+   136  0C2B  01D5               	clrf	_G_TickCount+1	;volatile
+   137  0C2C  01D6               	clrf	_G_TickCount+2	;volatile
+   138  0C2D  01D7               	clrf	_G_TickCount+3	;volatile
+   139                           ;ShotTimer.c: 150: G_ShotStart = 0;
+   140  0C2E  01D0               	clrf	_G_ShotStart
+   141  0C2F  01D1               	clrf	_G_ShotStart+1
+   142  0C30  01D2               	clrf	_G_ShotStart+2
+   143  0C31  01D3               	clrf	_G_ShotStart+3
+   144                           ;ShotTimer.c: 151: G_ShotEnd = 0;
+   145  0C32  01CC               	clrf	_G_ShotEnd
+   146  0C33  01CD               	clrf	_G_ShotEnd+1
+   147  0C34  01CE               	clrf	_G_ShotEnd+2
+   148  0C35  01CF               	clrf	_G_ShotEnd+3
+   149                           ;ShotTimer.c: 152: G_Last_Action = 0;
+   150  0C36  01B4               	clrf	_G_Last_Action
+   151  0C37  01B5               	clrf	_G_Last_Action+1
+   152  0C38  01B6               	clrf	_G_Last_Action+2
+   153  0C39  01B7               	clrf	_G_Last_Action+3
+   154                           ;ShotTimer.c: 153: G_PowerSW_FP = 0;
+   155  0C3A  01B8               	clrf	_G_PowerSW_FP
+   156  0C3B  01B9               	clrf	_G_PowerSW_FP+1
+   157  0C3C  01BA               	clrf	_G_PowerSW_FP+2
+   158  0C3D  01BB               	clrf	_G_PowerSW_FP+3
+   159                           ;ShotTimer.c: 154: (GIE = 1);
+   160  0C3E  178B               	bsf	11,7
+   161                           ;ShotTimer.c: 155: asm("nop");
+   162  0C3F  0000               	nop	;#
+   163                           ;ShotTimer.c: 156: }
+   164  0C40  0008               	return	;W free
+   165  0C41                     _StartUp
+   166                           ;	__dcnt assigned to ?a_StartUp+0
+   167  0000                     _StartUp$_dcnt	set	?a_StartUp
+   168                           ;	__dcnt assigned to ?a_StartUp+0
+   169  0000                     _StartUp$_dcnt	set	?a_StartUp
+   170                           ;ShotTimer.c: 253: void StartUp(void)
+   171  0C41  138B               	bcf	11,7
+   172                           ;ShotTimer.c: 260: (GIE = 1);
+   173  0C42  178B               	bsf	11,7
+   174                           ;ShotTimer.c: 261: asm("nop");
+   175  0C43  0000               	nop	;#
+   176                           ;ShotTimer.c: 262: TRISB3 = 0;
+   177  0C44  1683               	bsf	3,5
+   178  0C45  1303               	bcf	3,6	;carry unused
+   179  0C46  1186               	bcf	6,3
+   180                           ;ShotTimer.c: 263: RB3 = 1;
+   181  0C47  1283               	bcf	3,5
+   182  0C48  1586               	bsf	6,3
+   183                           ;ShotTimer.c: 264: DelayMs(255);
+   184  0C49  30FF               	movlw	-1
+   185  0C4A  118A  213F         	fcall	_DelayMs
+   186                           ;ShotTimer.c: 265: CHS2 = 0;
+   187  0C4C  129F               	bcf	31,5
+   188                           ;ShotTimer.c: 266: CHS1 = 0;
+   189  0C4D  121F               	bcf	31,4
+   190                           ;ShotTimer.c: 267: CHS0 = 1;
+   191  0C4E  159F               	bsf	31,3
+   192                           ;ShotTimer.c: 268: TRISA1 = 1;
+   193  0C4F  1683               	bsf	3,5
+   194  0C50  1485               	bsf	5,1
+   195                           ;ShotTimer.c: 269: CVRCON = 0b10001111;
+   196  0C51  308F               	movlw	-113
+   197  0C52  009D               	movwf	29	;volatile
+   198                           ;ShotTimer.c: 270: CMCON = 0b00000010;
+   199  0C53  3002               	movlw	2
+   200  0C54  009C               	movwf	28	;volatile
+   201                           ;ShotTimer.c: 271: DelayMs(255);
+   202  0C55  30FF               	movlw	-1
+   203  0C56  118A  213F  158A   	fcall	_DelayMs
+   204                           ;ShotTimer.c: 272: if (C2OUT == 1)
+   205  0C59  1683               	bsf	3,5
+   206  0C5A  1F9C               	btfss	28,7
+   207  0C5B  2C60               	goto	l23
+   208                           ;ShotTimer.c: 273: {
+   209  0C5C  1283               	bcf	3,5
+   210  0C5D  01A2               	clrf	_G_LBI
+   211  0C5E  0AA2               	incf	_G_LBI
+   212                           ;ShotTimer.c: 275: }
+   213  0C5F  2C62               	goto	l24
+   214  0C60                     l23
+   215                           ;ShotTimer.c: 276: else
+   216  0C60  1283               	bcf	3,5
+   217  0C61  01A2               	clrf	_G_LBI
+   218  0C62                     l24
+   219                           ;ShotTimer.c: 279: }
+   220  0C62  138B               	bcf	11,7
+   221                           ;ShotTimer.c: 284: TRISB = 0b00000011;
+   222  0C63  3003               	movlw	3
+   223  0C64  1683               	bsf	3,5
+   224  0C65  0086               	movwf	6	;volatile
+   225                           ;ShotTimer.c: 285: TRISA = 0b00000001;
+   226  0C66  3001               	movlw	1
+   227  0C67  0085               	movwf	5	;volatile
+   228                           ;ShotTimer.c: 286: PORTB = 0b00000000;
+   229  0C68  1283               	bcf	3,5
+   230  0C69  0186               	clrf	6	;volatile
+   231                           ;ShotTimer.c: 287: PORTA = 0b00000000;
+   232  0C6A  0185               	clrf	5	;volatile
+   233                           ;ShotTimer.c: 288: RB2 = 1;
+   234  0C6B  1506               	bsf	6,2
+   235                           ;ShotTimer.c: 289: OPTION = 0b00001000;
+   236  0C6C  3008               	movlw	8
+   237  0C6D  1683               	bsf	3,5
+   238  0C6E  0081               	movwf	1
+   239                           ;ShotTimer.c: 290: ADCON0 = 0b00000001;
+   240  0C6F  3001               	movlw	1
+   241  0C70  1283               	bcf	3,5
+   242  0C71  009F               	movwf	31	;volatile
+   243                           ;ShotTimer.c: 291: ADCON1 = 0b00001110;
+   244  0C72  300E               	movlw	14
+   245  0C73  1683               	bsf	3,5
+   246  0C74  009F               	movwf	31
+   247                           ;ShotTimer.c: 292: OSCCON = 0b01100000;
+   248  0C75  3060               	movlw	96
+   249  0C76  008F               	movwf	15	;volatile
+   250                           ;ShotTimer.c: 293: INTCON = 0b01100000;
+   251  0C77  008B               	movwf	11	;volatile
+   252                           ;ShotTimer.c: 294: PIE1 = 0b00000000;
+   253  0C78  018C               	clrf	12
+   254                           ;ShotTimer.c: 295: PIR1 = 0b00000000;
+   255  0C79  1283               	bcf	3,5
+   256  0C7A  018C               	clrf	12	;volatile
+   257                           ;ShotTimer.c: 296: ANSEL = 0b00000001;
+   258  0C7B  1683               	bsf	3,5
+   259  0C7C  019B               	clrf	27
+   260  0C7D  0A9B               	incf	27
+   261                           ;ShotTimer.c: 297: CVRCON = 0b00000000;
+   262  0C7E  019D               	clrf	29	;volatile
+   263                           ;ShotTimer.c: 298: CMCON = 0b00000111;
+   264  0C7F  3007               	movlw	7
+   265  0C80  009C               	movwf	28	;volatile
+   266                           ;ShotTimer.c: 299: (GIE = 1);
+   267  0C81  178B               	bsf	11,7
+   268                           ;ShotTimer.c: 300: asm("nop");
+   269  0C82  0000               	nop	;#
+   270                           ;ShotTimer.c: 302: if (G_Mode == 0)
+   271  0C83  08A1               	movf	_G_Mode^(0+128)
+   272  0C84  1D03               	btfss	3,2
+   273  0C85  2D3E               	goto	l25
+   274                           ;ShotTimer.c: 303: {
+   275  0C86  0000               	nop	;#
+   276  0C87  0000               	nop	;#
+   277  0C88  0000               	nop	;#
+   278  0C89  0000               	nop	;#
+   279  0C8A  0000               	nop	;#
+   280  0C8B  0000               	nop	;#
+   281  0C8C  0000               	nop	;#
+   282  0C8D  0000               	nop	;#
+   283  0C8E  0000               	nop	;#
+   284  0C8F  0000               	nop	;#
+   285  0C90  0000               	nop	;#
+   286  0C91  0000               	nop	;#
+   287  0C92  0000               	nop	;#
+   288  0C93  0000               	nop	;#
+   289  0C94  0000               	nop	;#
+   290                           ;ShotTimer.c: 305: ADGO = 1;
+   291  0C95  1283               	bcf	3,5
+   292  0C96  151F               	bsf	31,2
+   293                           ;ShotTimer.c: 308: ResetSettings();
+   294  0C97  2411               	fcall	_ResetSettings
+   295                           ;ShotTimer.c: 311: RA2 = 1;
+   296  0C98  1505               	bsf	5,2
+   297                           ;ShotTimer.c: 312: RA4 = 0;
+   298  0C99  1205               	bcf	5,4
+   299                           ;ShotTimer.c: 313: RA3 = 0;
+   300  0C9A  1185               	bcf	5,3
+   301                           ;ShotTimer.c: 315: DelayMs(15);
+   302  0C9B  300F               	movlw	15
+   303  0C9C  118A  213F         	fcall	_DelayMs
+   304                           ;ShotTimer.c: 316: RB7 = 0;
+   305  0C9E  1386               	bcf	6,7
+   306                           ;ShotTimer.c: 317: RB6 = 0;
+   307  0C9F  1306               	bcf	6,6
+   308                           ;ShotTimer.c: 318: RB5 = 1;
+   309  0CA0  1686               	bsf	6,5
+   310                           ;ShotTimer.c: 319: RB4 = 1;
+   311  0CA1  1606               	bsf	6,4
+   312                           ;ShotTimer.c: 320: ((RA3 = 1),(RA3=0));
+   313  0CA2  1585               	bsf	5,3
+   314  0CA3  1185               	bcf	5,3
+   315                           ;ShotTimer.c: 321: DelayMs(5);
+   316  0CA4  3005               	movlw	5
+   317  0CA5  118A  213F  158A   	fcall	_DelayMs
+   318                           ;ShotTimer.c: 322: ((RA3 = 1),(RA3=0));
+   319  0CA8  1585               	bsf	5,3
+   320  0CA9  1185               	bcf	5,3
+   321                           ;ShotTimer.c: 323: { unsigned char _dcnt; _dcnt
+      +                           = (200)*((12*1000L)/(12*1000L)); while(--_dcnt
+      +                           != 0) continue;};
+   322  0CAA  30C8               	movlw	-56
+   323  0CAB  00DB               	movwf	?a_StartUp
+   324  0CAC                     l27
+   325  0CAC  0BDB               	decfsz	?a_StartUp
+   326  0CAD  2CAC               	goto	l27
+   327                           ;ShotTimer.c: 324: ((RA3 = 1),(RA3=0));
+   328  0CAE  1585               	bsf	5,3
+   329  0CAF  1185               	bcf	5,3
+   330                           ;ShotTimer.c: 325: { unsigned char _dcnt; _dcnt
+      +                           = (200)*((12*1000L)/(12*1000L)); while(--_dcnt
+      +                           != 0) continue;};
+   331  0CB0  30C8               	movlw	-56
+   332  0CB1  00DB               	movwf	?a_StartUp
+   333  0CB2                     l30
+   334  0CB2  0BDB               	decfsz	?a_StartUp
+   335  0CB3  2CB2               	goto	l30
+   336                           ;ShotTimer.c: 326: RB7 = 0;
+   337  0CB4  1386               	bcf	6,7
+   338                           ;ShotTimer.c: 327: RB6 = 0;
+   339  0CB5  1306               	bcf	6,6
+   340                           ;ShotTimer.c: 328: RB5 = 1;
+   341  0CB6  1686               	bsf	6,5
+   342                           ;ShotTimer.c: 329: RB4 = 0;
+   343  0CB7  1206               	bcf	6,4
+   344                           ;ShotTimer.c: 330: ((RA3 = 1),(RA3=0));
+   345  0CB8  1585               	bsf	5,3
+   346  0CB9  1185               	bcf	5,3
+   347                           ;ShotTimer.c: 332: lcd_write(0x28);
+   348  0CBA  3028               	movlw	40
+   349  0CBB  158A  2742         	fcall	_lcd_write
+   350                           ;ShotTimer.c: 333: lcd_write(0xF);
+   351  0CBD  300F               	movlw	15
+   352  0CBE  158A  2742         	fcall	_lcd_write
+   353                           ;ShotTimer.c: 334: lcd_write(12);
+   354  0CC0  300C               	movlw	12
+   355  0CC1  158A  2742         	fcall	_lcd_write
+   356                           ;ShotTimer.c: 335: lcd_clear();
+   357  0CC3  118A  212A         	fcall	_lcd_clear
+   358                           ;ShotTimer.c: 336: lcd_write(0x6);
+   359  0CC5  3006               	movlw	6
+   360  0CC6  158A  2742         	fcall	_lcd_write
+   361                           ;ShotTimer.c: 337: lcd_clear();
+   362  0CC8  118A  212A         	fcall	_lcd_clear
+   363                           ;ShotTimer.c: 340: if (eeprom_read(0x00) != 0x0
+      +                          4)
+   364  0CCA  3000               	movlw	0
+   365  0CCB  118A  214C  158A   	fcall	_eeprom_read
+   366  0CCE  3A04               	xorlw	4
+   367  0CCF  1903               	btfsc	3,2
+   368  0CD0  2CD5               	goto	l32
+   369                           ;ShotTimer.c: 341: {
+   370  0CD1  30C8               	movlw	200
+   371  0CD2  00A6               	movwf	_G_High
+   372  0CD3  01A7               	clrf	_G_High+1
+   373                           ;ShotTimer.c: 343: }
+   374  0CD4  2CE9               	goto	l33
+   375  0CD5                     l32
+   376                           ;ShotTimer.c: 344: else
+   377  0CD5  3001               	movlw	1
+   378  0CD6  118A  214C         	fcall	_eeprom_read
+   379  0CD8  00F0               	movwf	btemp
+   380  0CD9  01F1               	clrf	btemp+1
+   381  0CDA  3064               	movlw	100
+   382  0CDB  00F2               	movwf	btemp+2
+   383  0CDC  3000               	movlw	0
+   384  0CDD  01F3               	clrf	btemp+3
+   385  0CDE  118A  215E  158A   	fcall	lwmul
+   386  0CE1  3064               	movlw	100
+   387  0CE2  0774               	addwf	btemp+4,w
+   388  0CE3  00A6               	movwf	_G_High
+   389  0CE4  3000               	movlw	0
+   390  0CE5  1803               	btfsc	3,0
+   391  0CE6  3001               	movlw	1
+   392  0CE7  0775               	addwf	btemp+5,w
+   393  0CE8  00A7               	movwf	_G_High+1
+   394  0CE9                     l33
+   395                           ;ShotTimer.c: 347: }
+   396  0CE9  0B22               	decfsz	_G_LBI,w
+   397  0CEA  2D09               	goto	l34
+   398                           ;ShotTimer.c: 352: {
+   399  0CEB  3000               	movlw	0
+   400  0CEC  118A  2124         	fcall	_lcd_goto
+   401                           ;ShotTimer.c: 354: lcd_puts("Low Battery ------
+      +                          ");
+   402  0CEE  30E6               	movlw	low u19
+   403  0CEF  00E9               	movwf	?_lcd_puts
+   404  0CF0  3000               	movlw	high u19
+   405  0CF1  00EA               	movwf	?_lcd_puts+1
+   406  0CF2  158A  2697         	fcall	_lcd_puts
+   407                           ;ShotTimer.c: 355: lcd_goto(0x40);
+   408  0CF4  3040               	movlw	64
+   409  0CF5  118A  2124         	fcall	_lcd_goto
+   410                           ;ShotTimer.c: 356: lcd_puts("Change The Battery
+      +                          ");
+   411  0CF7  3050               	movlw	low u29
+   412  0CF8  00E9               	movwf	?_lcd_puts
+   413  0CF9  3000               	movlw	high u29
+   414  0CFA  00EA               	movwf	?_lcd_puts+1
+   415  0CFB  158A  2697         	fcall	_lcd_puts
+   416                           ;ShotTimer.c: 357: DelayMs(255);
+   417  0CFD  30FF               	movlw	-1
+   418  0CFE  118A  213F         	fcall	_DelayMs
+   419                           ;ShotTimer.c: 358: DelayMs(255);
+   420  0D00  30FF               	movlw	-1
+   421  0D01  118A  213F         	fcall	_DelayMs
+   422                           ;ShotTimer.c: 359: DelayMs(255);
+   423  0D03  30FF               	movlw	-1
+   424  0D04  118A  213F         	fcall	_DelayMs
+   425                           ;ShotTimer.c: 360: DelayMs(255);
+   426  0D06  30FF               	movlw	-1
+   427  0D07  118A  213F         	fcall	_DelayMs
+   428  0D09                     l34
+   429                           ;ShotTimer.c: 361: }
+   430  0D09  3000               	movlw	0
+   431  0D0A  118A  2124         	fcall	_lcd_goto
+   432                           ;ShotTimer.c: 379: lcd_puts("  ShotTimer(TM) ")
+      +                          ;
+   433  0D0C  30FF               	movlw	low u39
+   434  0D0D  00E9               	movwf	?_lcd_puts
+   435  0D0E  3000               	movlw	high u39
+   436  0D0F  00EA               	movwf	?_lcd_puts+1
+   437  0D10  158A  2697         	fcall	_lcd_puts
+   438                           ;ShotTimer.c: 380: lcd_goto(0x40);
+   439  0D12  3040               	movlw	64
+   440  0D13  118A  2124         	fcall	_lcd_goto
+   441                           ;ShotTimer.c: 381: lcd_puts("Firmware: v1.2.1")
+      +                          ;
+   442  0D15  30D5               	movlw	low u49
+   443  0D16  00E9               	movwf	?_lcd_puts
+   444  0D17  3000               	movlw	high u49
+   445  0D18  00EA               	movwf	?_lcd_puts+1
+   446  0D19  158A  2697         	fcall	_lcd_puts
+   447                           ;ShotTimer.c: 382: DelayMs(255);
+   448  0D1B  30FF               	movlw	-1
+   449  0D1C  118A  213F         	fcall	_DelayMs
+   450                           ;ShotTimer.c: 383: DelayMs(255);
+   451  0D1E  30FF               	movlw	-1
+   452  0D1F  118A  213F  158A   	fcall	_DelayMs
+   453                           ;ShotTimer.c: 387: G_High += 2400;
+   454  0D22  3060               	movlw	96
+   455  0D23  07A6               	addwf	_G_High
+   456  0D24  1803               	btfsc	3,0
+   457  0D25  0AA7               	incf	_G_High+1
+   458  0D26  3009               	movlw	9
+   459  0D27  07A7               	addwf	_G_High+1
+   460                           ;ShotTimer.c: 390: G_UHigh = G_High;
+   461  0D28  0826               	movf	_G_High,w
+   462  0D29  00B2               	movwf	_G_UHigh
+   463  0D2A  0827               	movf	_G_High+1,w
+   464  0D2B  00B3               	movwf	_G_UHigh+1
+   465                           ;ShotTimer.c: 391: G_Low = (WORD) G_UHigh-400;
+   466  0D2C  3070               	movlw	112
+   467  0D2D  0732               	addwf	_G_UHigh,w
+   468  0D2E  00AE               	movwf	_G_Low
+   469  0D2F  30FE               	movlw	254
+   470  0D30  1803               	btfsc	3,0
+   471  0D31  30FF               	movlw	255
+   472  0D32  0733               	addwf	_G_UHigh+1,w
+   473  0D33  00AF               	movwf	_G_Low+1
+   474                           ;ShotTimer.c: 393: G_Mode = 1;
+   475  0D34  1683               	bsf	3,5
+   476  0D35  01A1               	clrf	_G_Mode^(0+128)
+   477  0D36  0AA1               	incf	_G_Mode^(0+128)
+   478                           ;ShotTimer.c: 394: G_Setting = 1;
+   479  0D37  01A2               	clrf	_G_Setting^(0+128)
+   480  0D38  0AA2               	incf	_G_Setting^(0+128)
+   481                           ;ShotTimer.c: 395: G_MaxSetting = 5;
+   482  0D39  3005               	movlw	5
+   483  0D3A  00A0               	movwf	_G_MaxSetting^(0+128)
+   484                           ;ShotTimer.c: 399: G_Refresh = 1;
+   485  0D3B  1283               	bcf	3,5
+   486  0D3C  01A4               	clrf	_G_Refresh
+   487  0D3D  0AA4               	incf	_G_Refresh
+   488  0D3E                     l25
+   489                           ;ShotTimer.c: 400: }
+   490  0D3E  1283               	bcf	3,5
+   491  0D3F  01B0               	clrf	_G_ShotCount
+   492  0D40  01B1               	clrf	_G_ShotCount+1
+   493                           ;ShotTimer.c: 403: }
+   494  0D41  0008               	return	;W free
+   495                           
+   496                           	psect	text2
+   497  0D42                     _CheckMic
+   498                           ;	_endtime assigned to ?a_CheckMic+0
+   499  0000                     _CheckMic$endtime	set	?a_CheckMic
+   500                           ;	_rof assigned to ?a_CheckMic+4
+   501  0000                     _CheckMic$rof	set	?a_CheckMic+4
+   502                           ;ShotTimer.c: 162: void CheckMic(void)
+   503  0D42  0000               	nop	;#
+   504  0D43  0000               	nop	;#
+   505  0D44  0000               	nop	;#
+   506  0D45  0000               	nop	;#
+   507  0D46  0000               	nop	;#
+   508  0D47  0000               	nop	;#
+   509  0D48  0000               	nop	;#
+   510  0D49  0000               	nop	;#
+   511  0D4A  0000               	nop	;#
+   512  0D4B  0000               	nop	;#
+   513  0D4C  0000               	nop	;#
+   514  0D4D  0000               	nop	;#
+   515  0D4E  0000               	nop	;#
+   516  0D4F  0000               	nop	;#
+   517  0D50  0000               	nop	;#
+   518                           ;ShotTimer.c: 168: ADGO = 1;
+   519  0D51  1283               	bcf	3,5
+   520  0D52  1303               	bcf	3,6	;carry unused
+   521  0D53  151F               	bsf	31,2
+   522                           ;ShotTimer.c: 169: asm("nop"); asm("nop"); asm(
+      +                          "nop"); asm("nop"); asm("nop"); asm("nop"); asm
+      +                          ("nop"); asm("nop"); asm("nop"); asm("nop"); as
+      +                          m("nop"); asm("nop"); asm("nop"); asm("nop"); a
+      +                          sm("nop");;
+   523  0D54  0000               	nop	;#
+   524  0D55  0000               	nop	;#
+   525  0D56  0000               	nop	;#
+   526  0D57  0000               	nop	;#
+   527  0D58  0000               	nop	;#
+   528  0D59  0000               	nop	;#
+   529  0D5A  0000               	nop	;#
+   530  0D5B  0000               	nop	;#
+   531  0D5C  0000               	nop	;#
+   532  0D5D  0000               	nop	;#
+   533  0D5E  0000               	nop	;#
+   534  0D5F  0000               	nop	;#
+   535  0D60  0000               	nop	;#
+   536  0D61  0000               	nop	;#
+   537  0D62  0000               	nop	;#
+   538                           ;ShotTimer.c: 170: while (ADGO == 1) asm("nop")
+      +                          ;
+   539                           ;ShotTimer.c: 171: asm("nop"); asm("nop"); asm(
+      +                          "nop"); asm("nop"); asm("nop"); asm("nop"); asm
+      +                          ("nop"); asm("nop"); asm("nop"); asm("nop"); as
+      +                          m("nop"); asm("nop"); asm("nop"); asm("nop"); a
+      +                          sm("nop");;
+   540  0D63  0000               	nop	;#
+   541  0D64  0000               	nop	;#
+   542  0D65  0000               	nop	;#
+   543  0D66  0000               	nop	;#
+   544  0D67  0000               	nop	;#
+   545  0D68  0000               	nop	;#
+   546  0D69  0000               	nop	;#
+   547  0D6A  0000               	nop	;#
+   548  0D6B  0000               	nop	;#
+   549  0D6C  0000               	nop	;#
+   550  0D6D  0000               	nop	;#
+   551  0D6E  0000               	nop	;#
+   552  0D6F  0000               	nop	;#
+   553  0D70  0000               	nop	;#
+   554  0D71                     L16
+   555  0D71  0000               	nop	;#
+   556  0D72  191F               	btfsc	31,2
+   557  0D73  2D71               	goto	L16
+   558                           ;ShotTimer.c: 173: G_Input = ( ADRESL | (ADRESH
+      +                          <<8) );
+   559  0D74  081E               	movf	30,w	;volatile
+   560  0D75  00AD               	movwf	_G_Input+1
+   561  0D76  1683               	bsf	3,5
+   562  0D77  081E               	movf	30,w	;volatile
+   563  0D78  1283               	bcf	3,5
+   564  0D79  00AC               	movwf	_G_Input
+   565                           ;ShotTimer.c: 175: if (G_Input > G_Highest)
+   566  0D7A  082D               	movf	_G_Input+1,w
+   567  0D7B  0229               	subwf	_G_Highest+1,w
+   568  0D7C  1D03               	btfss	3,2
+   569  0D7D  2D80               	goto	u45
+   570  0D7E  082C               	movf	_G_Input,w
+   571  0D7F  0228               	subwf	_G_Highest,w
+   572  0D80                     u45
+   573  0D80  1803               	btfsc	3,0
+   574  0D81  2D86               	goto	l9
+   575                           ;ShotTimer.c: 176: G_Highest = G_Input;
+   576  0D82  082C               	movf	_G_Input,w
+   577  0D83  00A8               	movwf	_G_Highest
+   578  0D84  082D               	movf	_G_Input+1,w
+   579  0D85  00A9               	movwf	_G_Highest+1
+   580  0D86                     l9
+   581                           ;ShotTimer.c: 178: if (G_Mode == 1)
+   582  0D86  1683               	bsf	3,5
+   583  0D87  0B21               	decfsz	_G_Mode^(0+128),w
+   584  0D88  2E95               	goto	l5
+   585                           ;ShotTimer.c: 179: {
+   586  0D89  1283               	bcf	3,5
+   587  0D8A  08A5               	movf	_G_ShotDuration
+   588  0D8B  1D03               	btfss	3,2
+   589  0D8C  2E4A               	goto	l11
+   590                           ;ShotTimer.c: 181: {
+   591  0D8D  0833               	movf	_G_UHigh+1,w
+   592  0D8E  022D               	subwf	_G_Input+1,w
+   593  0D8F  1D03               	btfss	3,2
+   594  0D90  2D93               	goto	u75
+   595  0D91  0832               	movf	_G_UHigh,w
+   596  0D92  022C               	subwf	_G_Input,w
+   597  0D93                     u75
+   598  0D93  1C03               	btfss	3,0
+   599  0D94  2E95               	goto	l5
+   600                           ;ShotTimer.c: 183: {
+   601  0D95  01A5               	clrf	_G_ShotDuration
+   602  0D96  0AA5               	incf	_G_ShotDuration
+   603                           ;ShotTimer.c: 186: if (G_ShotStart == 0)
+   604  0D97  0853               	movf	_G_ShotStart+3,w
+   605  0D98  0452               	iorwf	_G_ShotStart+2,w
+   606  0D99  0451               	iorwf	_G_ShotStart+1,w
+   607  0D9A  0450               	iorwf	_G_ShotStart,w
+   608                           ;ShotTimer.c: 187: {
+   609  0D9B  138B               	bcf	11,7
+   610  0D9C  1D03               	btfss	3,2
+   611  0D9D  2DB5               	goto	L2
+   612                           ;ShotTimer.c: 189: G_ShotStart = G_TickCount;
+   613  0D9E  0854               	movf	_G_TickCount,w	;volatile
+   614  0D9F  00D0               	movwf	_G_ShotStart
+   615  0DA0  0855               	movf	_G_TickCount+1,w	;volatile
+   616  0DA1  00D1               	movwf	_G_ShotStart+1
+   617  0DA2  0856               	movf	_G_TickCount+2,w	;volatile
+   618  0DA3  00D2               	movwf	_G_ShotStart+2
+   619  0DA4  0857               	movf	_G_TickCount+3,w	;volatile
+   620  0DA5  00D3               	movwf	_G_ShotStart+3
+   621                           ;ShotTimer.c: 190: (GIE = 1);
+   622  0DA6  178B               	bsf	11,7
+   623                           ;ShotTimer.c: 191: asm("nop");
+   624  0DA7  0000               	nop	;#
+   625                           ;ShotTimer.c: 193: endtime = G_ShotStart;
+   626  0DA8  0850               	movf	_G_ShotStart,w
+   627  0DA9  00DB               	movwf	?a_CheckMic
+   628  0DAA  0851               	movf	_G_ShotStart+1,w
+   629  0DAB  00DC               	movwf	?a_CheckMic+1
+   630  0DAC  0852               	movf	_G_ShotStart+2,w
+   631  0DAD  00DD               	movwf	?a_CheckMic+2
+   632  0DAE  0853               	movf	_G_ShotStart+3,w
+   633  0DAF  00DE               	movwf	?a_CheckMic+3
+   634                           ;ShotTimer.c: 194: G_ShotEnd = 0;
+   635  0DB0  01CC               	clrf	_G_ShotEnd
+   636  0DB1  01CD               	clrf	_G_ShotEnd+1
+   637  0DB2  01CE               	clrf	_G_ShotEnd+2
+   638  0DB3  01CF               	clrf	_G_ShotEnd+3
+   639                           ;ShotTimer.c: 195: }
+   640  0DB4  2E95               	goto	l5
+   641                           ;ShotTimer.c: 196: else
+   642  0DB5                     L2
+   643                           ;ShotTimer.c: 199: G_ShotEnd = G_TickCount;
+   644  0DB5  0854               	movf	_G_TickCount,w	;volatile
+   645  0DB6  00CC               	movwf	_G_ShotEnd
+   646  0DB7  0855               	movf	_G_TickCount+1,w	;volatile
+   647  0DB8  00CD               	movwf	_G_ShotEnd+1
+   648  0DB9  0856               	movf	_G_TickCount+2,w	;volatile
+   649  0DBA  00CE               	movwf	_G_ShotEnd+2
+   650  0DBB  0857               	movf	_G_TickCount+3,w	;volatile
+   651  0DBC  00CF               	movwf	_G_ShotEnd+3
+   652                           ;ShotTimer.c: 200: (GIE = 1);
+   653  0DBD  178B               	bsf	11,7
+   654                           ;ShotTimer.c: 201: asm("nop");
+   655  0DBE  0000               	nop	;#
+   656                           ;ShotTimer.c: 203: rof = (G_ShotEnd-G_ShotStart
+      +                          );
+   657  0DBF  0850               	movf	_G_ShotStart,w
+   658  0DC0  024C               	subwf	_G_ShotEnd,w
+   659  0DC1  00DF               	movwf	?a_CheckMic+4
+   660  0DC2  084D               	movf	_G_ShotEnd+1,w
+   661  0DC3  00E0               	movwf	?a_CheckMic+5
+   662  0DC4  0851               	movf	_G_ShotStart+1,w
+   663  0DC5  1C03               	btfss	3,0
+   664  0DC6  0F51               	incfsz	_G_ShotStart+1,w
+   665  0DC7  02E0               	subwf	?a_CheckMic+5
+   666  0DC8  084E               	movf	_G_ShotEnd+2,w
+   667  0DC9  00E1               	movwf	?a_CheckMic+6
+   668  0DCA  0852               	movf	_G_ShotStart+2,w
+   669  0DCB  1C03               	btfss	3,0
+   670  0DCC  0F52               	incfsz	_G_ShotStart+2,w
+   671  0DCD  02E1               	subwf	?a_CheckMic+6
+   672  0DCE  084F               	movf	_G_ShotEnd+3,w
+   673  0DCF  00E2               	movwf	?a_CheckMic+7
+   674  0DD0  0853               	movf	_G_ShotStart+3,w
+   675  0DD1  1C03               	btfss	3,0
+   676  0DD2  0F53               	incfsz	_G_ShotStart+3,w
+   677  0DD3  02E2               	subwf	?a_CheckMic+7
+   678                           ;ShotTimer.c: 205: if (G_ShotCount && (G_ShotCo
+      +                          unt <= 25))
+   679  0DD4  0831               	movf	_G_ShotCount+1,w
+   680  0DD5  0430               	iorwf	_G_ShotCount,w
+   681  0DD6  1903               	btfsc	3,2
+   682  0DD7  2E01               	goto	l15
+   683  0DD8  3000               	movlw	0
+   684  0DD9  0231               	subwf	_G_ShotCount+1,w
+   685  0DDA  301A               	movlw	26
+   686  0DDB  1903               	btfsc	3,2
+   687  0DDC  0230               	subwf	_G_ShotCount,w
+   688  0DDD  1803               	btfsc	3,0
+   689  0DDE  2E01               	goto	l15
+   690                           ;ShotTimer.c: 206: G_ShotList[G_ShotCount-1] = 
+      +                          rof;
+   691  0DDF  085F               	movf	?a_CheckMic+4,w
+   692  0DE0  00F0               	movwf	btemp
+   693  0DE1  0860               	movf	?a_CheckMic+5,w
+   694  0DE2  00F1               	movwf	btemp+1
+   695  0DE3  0861               	movf	?a_CheckMic+6,w
+   696  0DE4  00F2               	movwf	btemp+2
+   697  0DE5  0862               	movf	?a_CheckMic+7,w
+   698  0DE6  00F3               	movwf	btemp+3
+   699  0DE7  118A  271F         	fcall	lltoft
+   700  0DE9  0870               	movf	btemp,w
+   701  0DEA  00E3               	movwf	?a_CheckMic+8
+   702  0DEB  0871               	movf	btemp+1,w
+   703  0DEC  00E4               	movwf	?a_CheckMic+9
+   704  0DED  0872               	movf	btemp+2,w
+   705  0DEE  00E5               	movwf	?a_CheckMic+10
+   706  0DEF  3003               	movlw	3
+   707  0DF0  00F1               	movwf	btemp+1
+   708  0DF1  0830               	movf	_G_ShotCount,w
+   709  0DF2  118A  2133  158A   	fcall	lbmul
+   710  0DF5  3EFD               	addlw	-3
+   711  0DF6  3EA3               	addlw	_G_ShotList
+   712  0DF7  0084               	movwf	4
+   713  0DF8  1383               	bcf	3,7
+   714  0DF9  0863               	movf	?a_CheckMic+8,w
+   715  0DFA  0080               	movwf	0
+   716  0DFB  0A84               	incf	4
+   717  0DFC  0864               	movf	?a_CheckMic+9,w
+   718  0DFD  0080               	movwf	0
+   719  0DFE  0A84               	incf	4
+   720  0DFF  0865               	movf	?a_CheckMic+10,w
+   721  0E00  0080               	movwf	0
+   722  0E01                     l15
+   723                           ;ShotTimer.c: 208: G_ShotStart = G_ShotEnd;
+   724  0E01  084C               	movf	_G_ShotEnd,w
+   725  0E02  00D0               	movwf	_G_ShotStart
+   726  0E03  084D               	movf	_G_ShotEnd+1,w
+   727  0E04  00D1               	movwf	_G_ShotStart+1
+   728  0E05  084E               	movf	_G_ShotEnd+2,w
+   729  0E06  00D2               	movwf	_G_ShotStart+2
+   730  0E07  084F               	movf	_G_ShotEnd+3,w
+   731  0E08  00D3               	movwf	_G_ShotStart+3
+   732                           ;ShotTimer.c: 209: G_ShotEnd = 0;
+   733  0E09  01CC               	clrf	_G_ShotEnd
+   734  0E0A  01CD               	clrf	_G_ShotEnd+1
+   735  0E0B  01CE               	clrf	_G_ShotEnd+2
+   736  0E0C  01CF               	clrf	_G_ShotEnd+3
+   737                           ;ShotTimer.c: 211: if ((rof < G_Setting_Fastest
+      +                          ) || !G_Setting_Fastest)
+   738  0E0D  0847               	movf	_G_Setting_Fastest+3,w
+   739  0E0E  0262               	subwf	?a_CheckMic+7,w
+   740  0E0F  1D03               	btfss	3,2
+   741  0E10  2E1B               	goto	u125
+   742  0E11  0846               	movf	_G_Setting_Fastest+2,w
+   743  0E12  0261               	subwf	?a_CheckMic+6,w
+   744  0E13  1D03               	btfss	3,2
+   745  0E14  2E1B               	goto	u125
+   746  0E15  0845               	movf	_G_Setting_Fastest+1,w
+   747  0E16  0260               	subwf	?a_CheckMic+5,w
+   748  0E17  1D03               	btfss	3,2
+   749  0E18  2E1B               	goto	u125
+   750  0E19  0844               	movf	_G_Setting_Fastest,w
+   751  0E1A  025F               	subwf	?a_CheckMic+4,w
+   752  0E1B                     u125
+   753  0E1B  1C03               	btfss	3,0
+   754  0E1C  2E23               	goto	u140
+   755  0E1D  0847               	movf	_G_Setting_Fastest+3,w
+   756  0E1E  0446               	iorwf	_G_Setting_Fastest+2,w
+   757  0E1F  0445               	iorwf	_G_Setting_Fastest+1,w
+   758  0E20  0444               	iorwf	_G_Setting_Fastest,w
+   759  0E21  1D03               	btfss	3,2
+   760  0E22  2E2B               	goto	l16
+   761  0E23                     u140
+   762                           ;ShotTimer.c: 212: G_Setting_Fastest = rof;
+   763  0E23  085F               	movf	?a_CheckMic+4,w
+   764  0E24  00C4               	movwf	_G_Setting_Fastest
+   765  0E25  0860               	movf	?a_CheckMic+5,w
+   766  0E26  00C5               	movwf	_G_Setting_Fastest+1
+   767  0E27  0861               	movf	?a_CheckMic+6,w
+   768  0E28  00C6               	movwf	_G_Setting_Fastest+2
+   769  0E29  0862               	movf	?a_CheckMic+7,w
+   770  0E2A  00C7               	movwf	_G_Setting_Fastest+3
+   771  0E2B                     l16
+   772                           ;ShotTimer.c: 214: if ((rof > G_Setting_Slowest
+      +                          ) || !G_Setting_Slowest)
+   773  0E2B  0862               	movf	?a_CheckMic+7,w
+   774  0E2C  024B               	subwf	_G_Setting_Slowest+3,w
+   775  0E2D  1D03               	btfss	3,2
+   776  0E2E  2E39               	goto	u155
+   777  0E2F  0861               	movf	?a_CheckMic+6,w
+   778  0E30  024A               	subwf	_G_Setting_Slowest+2,w
+   779  0E31  1D03               	btfss	3,2
+   780  0E32  2E39               	goto	u155
+   781  0E33  0860               	movf	?a_CheckMic+5,w
+   782  0E34  0249               	subwf	_G_Setting_Slowest+1,w
+   783  0E35  1D03               	btfss	3,2
+   784  0E36  2E39               	goto	u155
+   785  0E37  085F               	movf	?a_CheckMic+4,w
+   786  0E38  0248               	subwf	_G_Setting_Slowest,w
+   787  0E39                     u155
+   788  0E39  1C03               	btfss	3,0
+   789  0E3A  2E41               	goto	u170
+   790  0E3B  084B               	movf	_G_Setting_Slowest+3,w
+   791  0E3C  044A               	iorwf	_G_Setting_Slowest+2,w
+   792  0E3D  0449               	iorwf	_G_Setting_Slowest+1,w
+   793  0E3E  0448               	iorwf	_G_Setting_Slowest,w
+   794  0E3F  1D03               	btfss	3,2
+   795  0E40  2E95               	goto	l5
+   796  0E41                     u170
+   797                           ;ShotTimer.c: 215: G_Setting_Slowest = rof;
+   798  0E41  085F               	movf	?a_CheckMic+4,w
+   799  0E42  00C8               	movwf	_G_Setting_Slowest
+   800  0E43  0860               	movf	?a_CheckMic+5,w
+   801  0E44  00C9               	movwf	_G_Setting_Slowest+1
+   802  0E45  0861               	movf	?a_CheckMic+6,w
+   803  0E46  00CA               	movwf	_G_Setting_Slowest+2
+   804  0E47  0862               	movf	?a_CheckMic+7,w
+   805  0E48  00CB               	movwf	_G_Setting_Slowest+3
+   806                           ;ShotTimer.c: 216: }
+   807  0E49  2E95               	goto	l5
+   808  0E4A                     l11
+   809                           ;ShotTimer.c: 219: else
+   810  0E4A  0829               	movf	_G_Highest+1,w
+   811  0E4B  022F               	subwf	_G_Low+1,w
+   812  0E4C  1D03               	btfss	3,2
+   813  0E4D  2E50               	goto	u185
+   814  0E4E  0828               	movf	_G_Highest,w
+   815  0E4F  022E               	subwf	_G_Low,w
+   816  0E50                     u185
+   817  0E50  1C03               	btfss	3,0
+   818  0E51  2E88               	goto	l19
+   819                           ;ShotTimer.c: 222: {
+   820  0E52  138B               	bcf	11,7
+   821                           ;ShotTimer.c: 224: if (G_TickCount >= endtime+3
+      +                          3333)
+   822  0E53  3035               	movlw	53
+   823  0E54  00F0               	movwf	btemp
+   824  0E55  3082               	movlw	130
+   825  0E56  00F1               	movwf	btemp+1
+   826  0E57  01F2               	clrf	btemp+2
+   827  0E58  01F3               	clrf	btemp+3
+   828  0E59  0870               	movf	btemp,w
+   829  0E5A  075B               	addwf	?a_CheckMic,w
+   830  0E5B  00F4               	movwf	btemp+4
+   831  0E5C  085C               	movf	?a_CheckMic+1,w
+   832  0E5D  00F5               	movwf	btemp+5
+   833  0E5E  0871               	movf	btemp+1,w
+   834  0E5F  1803               	btfsc	3,0
+   835  0E60  0F71               	incfsz	btemp+1,w
+   836  0E61  07F5               	addwf	btemp+5
+   837  0E62  085D               	movf	?a_CheckMic+2,w
+   838  0E63  00F6               	movwf	btemp+6
+   839  0E64  0872               	movf	btemp+2,w
+   840  0E65  1803               	btfsc	3,0
+   841  0E66  0F72               	incfsz	btemp+2,w
+   842  0E67  07F6               	addwf	btemp+6
+   843  0E68  085E               	movf	?a_CheckMic+3,w
+   844  0E69  00F7               	movwf	btemp+7
+   845  0E6A  0873               	movf	btemp+3,w
+   846  0E6B  1803               	btfsc	3,0
+   847  0E6C  0F73               	incfsz	btemp+3,w
+   848  0E6D  07F7               	addwf	btemp+7
+   849  0E6E  0877               	movf	btemp+7,w
+   850  0E6F  0257               	subwf	_G_TickCount+3,w	;volatile
+   851  0E70  1D03               	btfss	3,2
+   852  0E71  2E7C               	goto	u195
+   853  0E72  0876               	movf	btemp+6,w
+   854  0E73  0256               	subwf	_G_TickCount+2,w	;volatile
+   855  0E74  1D03               	btfss	3,2
+   856  0E75  2E7C               	goto	u195
+   857  0E76  0875               	movf	btemp+5,w
+   858  0E77  0255               	subwf	_G_TickCount+1,w	;volatile
+   859  0E78  1D03               	btfss	3,2
+   860  0E79  2E7C               	goto	u195
+   861  0E7A  0874               	movf	btemp+4,w
+   862  0E7B  0254               	subwf	_G_TickCount,w	;volatile
+   863  0E7C                     u195
+   864                           ;ShotTimer.c: 225: {
+   865  0E7C  178B               	bsf	11,7
+   866                           ;ShotTimer.c: 227: asm("nop");
+   867  0E7D  0000               	nop	;#
+   868  0E7E  1C03               	btfss	3,0
+   869  0E7F  2E95               	goto	l5
+   870                           ;ShotTimer.c: 228: G_ShotDuration = 0;
+   871  0E80  01A5               	clrf	_G_ShotDuration
+   872                           ;ShotTimer.c: 229: G_ShotCount++;
+   873  0E81  0AB0               	incf	_G_ShotCount
+   874  0E82  1903               	btfsc	3,2
+   875  0E83  0AB1               	incf	_G_ShotCount+1
+   876                           ;ShotTimer.c: 230: G_Refresh = 1;
+   877  0E84  01A4               	clrf	_G_Refresh
+   878  0E85  0AA4               	incf	_G_Refresh
+   879                           ;ShotTimer.c: 231: (GIE = 0);
+   880  0E86  138B               	bcf	11,7
+   881  0E87  2E93               	goto	L1
+   882                           ;ShotTimer.c: 232: }
+   883                           ;ShotTimer.c: 234: asm("nop");
+   884                           ;ShotTimer.c: 235: }
+   885  0E88                     l19
+   886                           ;ShotTimer.c: 236: else
+   887  0E88  01A8               	clrf	_G_Highest
+   888  0E89  01A9               	clrf	_G_Highest+1
+   889                           ;ShotTimer.c: 240: (GIE = 0);
+   890  0E8A  138B               	bcf	11,7
+   891                           ;ShotTimer.c: 241: endtime = G_TickCount;
+   892  0E8B  0854               	movf	_G_TickCount,w	;volatile
+   893  0E8C  00DB               	movwf	?a_CheckMic
+   894  0E8D  0855               	movf	_G_TickCount+1,w	;volatile
+   895  0E8E  00DC               	movwf	?a_CheckMic+1
+   896  0E8F  0856               	movf	_G_TickCount+2,w	;volatile
+   897  0E90  00DD               	movwf	?a_CheckMic+2
+   898  0E91  0857               	movf	_G_TickCount+3,w	;volatile
+   899  0E92  00DE               	movwf	?a_CheckMic+3
+   900  0E93                     L1
+   901                           ;ShotTimer.c: 242: (GIE = 1);
+   902  0E93  178B               	bsf	11,7
+   903                           ;ShotTimer.c: 243: asm("nop");
+   904  0E94  0000               	nop	;#
+   905                           ;ShotTimer.c: 244: }
+   906  0E95                     l5
+   907  0E95  1283               	bcf	3,5
+   908  0E96  0008               	return	;W free
+   909                           
+   910                           	psect	text4
+   911  0193                     _ShutDown
+   912                           ;ShotTimer.c: 409: void ShutDown(void)
+   913  0193  118A  212A  118A   	fcall	_lcd_clear
+   914                           ;ShotTimer.c: 414: if (G_Mode == 2)
+   915  0196  1683               	bsf	3,5
+   916  0197  0821               	movf	_G_Mode^(0+128),w
+   917  0198  3A02               	xorlw	2
+   918  0199  1D03               	btfss	3,2
+   919  019A  29A9               	goto	l37
+   920                           ;ShotTimer.c: 415: {
+   921  019B  3004               	movlw	4
+   922  019C  1283               	bcf	3,5
+   923  019D  00DB               	movwf	?_eeprom_write
+   924  019E  3000               	movlw	0
+   925  019F  118A  2173         	fcall	_eeprom_write
+   926                           ;ShotTimer.c: 417: eeprom_write(0x01, G_Setting
+      +                          );
+   927  01A1  1683               	bsf	3,5
+   928  01A2  0822               	movf	_G_Setting^(0+128),w
+   929  01A3  1283               	bcf	3,5
+   930  01A4  00DB               	movwf	?_eeprom_write
+   931  01A5  3001               	movlw	1
+   932  01A6  118A  2173  118A   	fcall	_eeprom_write
+   933                           ;ShotTimer.c: 418: }
+   934  01A9                     l37
+   935  01A9  1283               	bcf	3,5
+   936  01AA  1806               	btfsc	6,0
+   937  01AB  29AE               	goto	l39
+   938  01AC  0000               	nop	;#
+   939  01AD  29A9               	goto	l37
+   940  01AE                     l39
+   941                           ;ShotTimer.c: 423: (GIE = 0);
+   942  01AE  138B               	bcf	11,7
+   943                           ;ShotTimer.c: 424: OPTION = 0b00001000;
+   944  01AF  3008               	movlw	8
+   945  01B0  1683               	bsf	3,5
+   946  01B1  0081               	movwf	1
+   947                           ;ShotTimer.c: 425: ADCON0 = 0b00000000;
+   948  01B2  1283               	bcf	3,5
+   949  01B3  019F               	clrf	31	;volatile
+   950                           ;ShotTimer.c: 426: ADCON1 = 0b00000000;
+   951  01B4  1683               	bsf	3,5
+   952  01B5  019F               	clrf	31
+   953                           ;ShotTimer.c: 427: OSCCON = 0b00000001;
+   954  01B6  3001               	movlw	1
+   955  01B7  008F               	movwf	15	;volatile
+   956                           ;ShotTimer.c: 428: INTCON = 0b00010000;
+   957  01B8  3010               	movlw	16
+   958  01B9  008B               	movwf	11	;volatile
+   959                           ;ShotTimer.c: 429: PIE1 = 0b00000000;
+   960  01BA  018C               	clrf	12
+   961                           ;ShotTimer.c: 430: PIR1 = 0b00000000;
+   962  01BB  1283               	bcf	3,5
+   963  01BC  018C               	clrf	12	;volatile
+   964                           ;ShotTimer.c: 431: ANSEL = 0b00000000;
+   965  01BD  1683               	bsf	3,5
+   966  01BE  019B               	clrf	27
+   967                           ;ShotTimer.c: 432: CVRCON = 0b00000000;
+   968  01BF  019D               	clrf	29	;volatile
+   969                           ;ShotTimer.c: 433: CMCON = 0b00000111;
+   970  01C0  3007               	movlw	7
+   971  01C1  009C               	movwf	28	;volatile
+   972                           ;ShotTimer.c: 467: INTEDG = 0;
+   973  01C2  1301               	bcf	1,6
+   974                           ;ShotTimer.c: 468: RBPU = 0;
+   975  01C3  1381               	bcf	1,7
+   976                           ;ShotTimer.c: 471: PORTB = 0x01;
+   977  01C4  3001               	movlw	1
+   978  01C5  1283               	bcf	3,5
+   979  01C6  0086               	movwf	6	;volatile
+   980                           ;ShotTimer.c: 472: PORTA = 0x00;
+   981  01C7  0185               	clrf	5	;volatile
+   982                           ;ShotTimer.c: 473: DelayMs(50);
+   983  01C8  3032               	movlw	50
+   984  01C9  118A  213F         	fcall	_DelayMs
+   985                           ;ShotTimer.c: 475: (GIE = 1);
+   986  01CB  178B               	bsf	11,7
+   987                           ;ShotTimer.c: 476: asm("nop");
+   988  01CC  0000               	nop	;#
+   989                           ;ShotTimer.c: 477: DelayMs(50);
+   990  01CD  3032               	movlw	50
+   991  01CE  118A  213F         	fcall	_DelayMs
+   992                           ;ShotTimer.c: 479: asm("sleep");
+   993  01D0  0063               	sleep	;#
+   994                           ;ShotTimer.c: 481: TRISB = 0x01;
+   995  01D1  3001               	movlw	1
+   996  01D2  1683               	bsf	3,5
+   997  01D3  0086               	movwf	6	;volatile
+   998                           ;ShotTimer.c: 482: TRISA = 0x00;
+   999  01D4  0185               	clrf	5	;volatile
+  1000                           ;ShotTimer.c: 483: PORTB = 0x01;
+  1001  01D5  1283               	bcf	3,5
+  1002  01D6  0086               	movwf	6	;volatile
+  1003                           ;ShotTimer.c: 484: PORTA = 0x00;
+  1004  01D7  0185               	clrf	5	;volatile
+  1005                           ;ShotTimer.c: 488: DelayMs(255);
+  1006  01D8  30FF               	movlw	-1
+  1007  01D9  118A  213F         	fcall	_DelayMs
+  1008                           ;ShotTimer.c: 489: DelayMs(255);
+  1009  01DB  30FF               	movlw	-1
+  1010  01DC  118A  213F  118A   	fcall	_DelayMs
+  1011                           ;ShotTimer.c: 491: RBPU = 0;
+  1012  01DF  1683               	bsf	3,5
+  1013  01E0  1381               	bcf	1,7
+  1014                           ;ShotTimer.c: 492: PEIE = 0;
+  1015  01E1  130B               	bcf	11,6
+  1016                           ;ShotTimer.c: 494: G_Mode = 0;
+  1017  01E2  01A1               	clrf	_G_Mode^(0+128)
+  1018                           ;ShotTimer.c: 495: }
+  1019  01E3  1283               	bcf	3,5
+  1020  01E4  0008               	return	;W free
+  1021                           
+  1022                           	psect	text5
+  1023  01E5                     _main
+  1024                           ;ShotTimer.c: 501: void main()
+  1025  01E5  300A               	movlw	10
+  1026  01E6  118A  213F         	fcall	_DelayMs
+  1027                           ;ShotTimer.c: 507: G_Mode = 1;
+  1028  01E8  1683               	bsf	3,5
+  1029  01E9  01A1               	clrf	_G_Mode^(0+128)
+  1030  01EA  0AA1               	incf	_G_Mode^(0+128)
+  1031                           ;ShotTimer.c: 508: StartUp();
+  1032  01EB  158A  2441         	fcall	_StartUp
+  1033                           ;ShotTimer.c: 509: ShutDown();
+  1034  01ED  118A  2193  118A   	fcall	_ShutDown
+  1035  01F0                     l42
+  1036                           ;ShotTimer.c: 511: while(1)
+  1037                           ;ShotTimer.c: 512: {
+  1038  01F0  0000               	nop	;#
+  1039                           ;ShotTimer.c: 516: if (RB0 == 0)
+  1040  01F1  1283               	bcf	3,5
+  1041  01F2  1806               	btfsc	6,0
+  1042  01F3  2AD6               	goto	l44
+  1043                           ;ShotTimer.c: 517: {
+  1044  01F4  138B               	bcf	11,7
+  1045  01F5  0854               	movf	_G_TickCount,w	;volatile
+  1046  01F6  00B4               	movwf	_G_Last_Action
+  1047  01F7  0855               	movf	_G_TickCount+1,w	;volatile
+  1048  01F8  00B5               	movwf	_G_Last_Action+1
+  1049  01F9  0856               	movf	_G_TickCount+2,w	;volatile
+  1050  01FA  00B6               	movwf	_G_Last_Action+2
+  1051  01FB  0857               	movf	_G_TickCount+3,w	;volatile
+  1052  01FC  00B7               	movwf	_G_Last_Action+3
+  1053  01FD  178B               	bsf	11,7
+  1054  01FE  0000               	nop	;#
+  1055                           ;ShotTimer.c: 520: if (G_Mode == 0)
+  1056  01FF  1683               	bsf	3,5
+  1057  0200  08A1               	movf	_G_Mode^(0+128)
+  1058  0201  1D03               	btfss	3,2
+  1059  0202  2A07               	goto	l45
+  1060                           ;ShotTimer.c: 521: {
+  1061  0203  158A  2441  118A   	fcall	_StartUp
+  1062                           ;ShotTimer.c: 524: }
+  1063  0206  2AE1               	goto	l61
+  1064  0207                     l45
+  1065                           ;ShotTimer.c: 525: else
+  1066  0207  1283               	bcf	3,5
+  1067  0208  083B               	movf	_G_PowerSW_FP+3,w
+  1068  0209  043A               	iorwf	_G_PowerSW_FP+2,w
+  1069  020A  0439               	iorwf	_G_PowerSW_FP+1,w
+  1070  020B  0438               	iorwf	_G_PowerSW_FP,w
+  1071  020C  1D03               	btfss	3,2
+  1072  020D  2A9D               	goto	l47
+  1073                           ;ShotTimer.c: 528: {
+  1074  020E  1683               	bsf	3,5
+  1075  020F  0B21               	decfsz	_G_Mode^(0+128),w
+  1076  0210  2A8F               	goto	l48
+  1077                           ;ShotTimer.c: 531: {
+  1078  0211  0B22               	decfsz	_G_Setting^(0+128),w
+  1079  0212  2A14               	goto	l49
+  1080  0213  2A6E               	goto	L28
+  1081                           ;ShotTimer.c: 533: {
+  1082                           ;ShotTimer.c: 536: G_Setting_Slowest = 0;
+  1083                           ;ShotTimer.c: 537: G_ShotCount = 0;
+  1084                           ;ShotTimer.c: 538: G_ShotStart = 0;
+  1085                           ;ShotTimer.c: 539: }
+  1086  0214                     l49
+  1087                           ;ShotTimer.c: 540: else if (G_Setting == 2)
+  1088  0214  0822               	movf	_G_Setting^(0+128),w
+  1089  0215  3A02               	xorlw	2
+  1090  0216  1D03               	btfss	3,2
+  1091  0217  2A22               	goto	l51
+  1092                           ;ShotTimer.c: 541: {
+  1093  0218  1283               	bcf	3,5
+  1094  0219  01C8               	clrf	_G_Setting_Slowest
+  1095  021A  01C9               	clrf	_G_Setting_Slowest+1
+  1096  021B  01CA               	clrf	_G_Setting_Slowest+2
+  1097  021C  01CB               	clrf	_G_Setting_Slowest+3
+  1098                           ;ShotTimer.c: 544: G_Setting_Fastest = 0;
+  1099  021D  01C4               	clrf	_G_Setting_Fastest
+  1100  021E  01C5               	clrf	_G_Setting_Fastest+1
+  1101  021F  01C6               	clrf	_G_Setting_Fastest+2
+  1102  0220  01C7               	clrf	_G_Setting_Fastest+3
+  1103  0221  2A77               	goto	L27
+  1104                           ;ShotTimer.c: 545: G_ShotCount = 0;
+  1105                           ;ShotTimer.c: 546: G_ShotStart = 0;
+  1106                           ;ShotTimer.c: 547: }
+  1107  0222                     l51
+  1108                           ;ShotTimer.c: 548: else if (G_Setting == 3)
+  1109  0222  0822               	movf	_G_Setting^(0+128),w
+  1110  0223  3A03               	xorlw	3
+  1111  0224  1903               	btfsc	3,2
+  1112  0225  2A6E               	goto	L28
+  1113                           ;ShotTimer.c: 549: {
+  1114                           ;ShotTimer.c: 551: G_Setting_Slowest = 0;
+  1115                           ;ShotTimer.c: 553: G_ShotCount = 0;
+  1116                           ;ShotTimer.c: 554: G_ShotStart = 0;
+  1117                           ;ShotTimer.c: 555: }
+  1118                           ;ShotTimer.c: 556: else if (G_Setting == 4)
+  1119  0226  0822               	movf	_G_Setting^(0+128),w
+  1120  0227  3A04               	xorlw	4
+  1121  0228  1D03               	btfss	3,2
+  1122  0229  2A36               	goto	l55
+  1123                           ;ShotTimer.c: 557: {
+  1124  022A  1283               	bcf	3,5
+  1125  022B  01B0               	clrf	_G_ShotCount
+  1126  022C  01B1               	clrf	_G_ShotCount+1
+  1127                           ;ShotTimer.c: 560: G_Setting_Fastest = 0;
+  1128  022D  01C4               	clrf	_G_Setting_Fastest
+  1129  022E  01C5               	clrf	_G_Setting_Fastest+1
+  1130  022F  01C6               	clrf	_G_Setting_Fastest+2
+  1131  0230  01C7               	clrf	_G_Setting_Fastest+3
+  1132                           ;ShotTimer.c: 561: G_Setting_Slowest = 0;
+  1133  0231  01C8               	clrf	_G_Setting_Slowest
+  1134  0232  01C9               	clrf	_G_Setting_Slowest+1
+  1135  0233  01CA               	clrf	_G_Setting_Slowest+2
+  1136  0234  01CB               	clrf	_G_Setting_Slowest+3
+  1137  0235  2A79               	goto	L20
+  1138                           ;ShotTimer.c: 562: G_ShotStart = 0;
+  1139                           ;ShotTimer.c: 563: }
+  1140  0236                     l55
+  1141                           ;ShotTimer.c: 564: else if (G_Setting == 5)
+  1142  0236  0822               	movf	_G_Setting^(0+128),w
+  1143  0237  3A05               	xorlw	5
+  1144  0238  1D03               	btfss	3,2
+  1145  0239  2A54               	goto	l57
+  1146                           ;ShotTimer.c: 565: {
+  1147  023A  1283               	bcf	3,5
+  1148  023B  01A3               	clrf	_G_Minutes
+  1149                           ;ShotTimer.c: 567: G_Seconds = 0;
+  1150  023C  01C0               	clrf	_G_Seconds
+  1151  023D  01C1               	clrf	_G_Seconds+1
+  1152  023E  01C2               	clrf	_G_Seconds+2
+  1153  023F  01C3               	clrf	_G_Seconds+3
+  1154                           ;ShotTimer.c: 568: (GIE = 0);
+  1155  0240  138B               	bcf	11,7
+  1156                           ;ShotTimer.c: 569: G_Refresh_LastCheck = G_Tick
+      +                          Count;
+  1157  0241  0854               	movf	_G_TickCount,w	;volatile
+  1158  0242  00BC               	movwf	_G_Refresh_LastCheck
+  1159  0243  0855               	movf	_G_TickCount+1,w	;volatile
+  1160  0244  00BD               	movwf	_G_Refresh_LastCheck+1
+  1161  0245  0856               	movf	_G_TickCount+2,w	;volatile
+  1162  0246  00BE               	movwf	_G_Refresh_LastCheck+2
+  1163  0247  0857               	movf	_G_TickCount+3,w	;volatile
+  1164  0248  00BF               	movwf	_G_Refresh_LastCheck+3
+  1165                           ;ShotTimer.c: 570: G_Seconds = G_Refresh_LastCh
+      +                          eck;
+  1166  0249  083C               	movf	_G_Refresh_LastCheck,w
+  1167  024A  00C0               	movwf	_G_Seconds
+  1168  024B  083D               	movf	_G_Refresh_LastCheck+1,w
+  1169  024C  00C1               	movwf	_G_Seconds+1
+  1170  024D  083E               	movf	_G_Refresh_LastCheck+2,w
+  1171  024E  00C2               	movwf	_G_Seconds+2
+  1172  024F  083F               	movf	_G_Refresh_LastCheck+3,w
+  1173  0250  00C3               	movwf	_G_Seconds+3
+  1174                           ;ShotTimer.c: 571: (GIE = 1);
+  1175  0251  178B               	bsf	11,7
+  1176                           ;ShotTimer.c: 572: asm("nop");
+  1177  0252  0000               	nop	;#
+  1178                           ;ShotTimer.c: 573: }
+  1179  0253  2A7D               	goto	l50
+  1180  0254                     l57
+  1181                           ;ShotTimer.c: 574: else if (G_Setting >= G_MaxS
+      +                          etting+1)
+  1182  0254  0820               	movf	_G_MaxSetting^(0+128),w
+  1183  0255  00F2               	movwf	btemp+2
+  1184  0256  01F3               	clrf	btemp+3
+  1185  0257  3001               	movlw	1
+  1186  0258  07F2               	addwf	btemp+2
+  1187  0259  1803               	btfsc	3,0
+  1188  025A  0AF3               	incf	btemp+3
+  1189  025B  0822               	movf	_G_Setting^(0+128),w
+  1190  025C  00F0               	movwf	btemp
+  1191  025D  01F1               	clrf	btemp+1
+  1192  025E  0871               	movf	btemp+1,w
+  1193  025F  3A80               	xorlw	128
+  1194  0260  00F4               	movwf	btemp+4
+  1195  0261  0873               	movf	btemp+3,w
+  1196  0262  3A80               	xorlw	128
+  1197  0263  0274               	subwf	btemp+4,w
+  1198  0264  1D03               	btfss	3,2
+  1199  0265  2A68               	goto	u375
+  1200  0266  0872               	movf	btemp+2,w
+  1201  0267  0270               	subwf	btemp,w
+  1202  0268                     u375
+  1203  0268  1C03               	btfss	3,0
+  1204  0269  2A7D               	goto	l50
+  1205                           ;ShotTimer.c: 575: {
+  1206  026A  1683               	bsf	3,5
+  1207  026B  1303               	bcf	3,6	;carry unused
+  1208  026C  01A2               	clrf	_G_Setting^(0+128)
+  1209  026D  0AA2               	incf	_G_Setting^(0+128)
+  1210  026E                     L28
+  1211                           ;ShotTimer.c: 578: G_Setting_Fastest = 0;
+  1212  026E  1283               	bcf	3,5
+  1213  026F  01C4               	clrf	_G_Setting_Fastest
+  1214  0270  01C5               	clrf	_G_Setting_Fastest+1
+  1215  0271  01C6               	clrf	_G_Setting_Fastest+2
+  1216  0272  01C7               	clrf	_G_Setting_Fastest+3
+  1217                           ;ShotTimer.c: 580: G_Setting_Slowest = 0;
+  1218  0273  01C8               	clrf	_G_Setting_Slowest
+  1219  0274  01C9               	clrf	_G_Setting_Slowest+1
+  1220  0275  01CA               	clrf	_G_Setting_Slowest+2
+  1221  0276  01CB               	clrf	_G_Setting_Slowest+3
+  1222  0277                     L27
+  1223                           ;ShotTimer.c: 581: G_ShotCount = 0;
+  1224  0277  01B0               	clrf	_G_ShotCount
+  1225  0278  01B1               	clrf	_G_ShotCount+1
+  1226  0279                     L20
+  1227                           ;ShotTimer.c: 582: G_ShotStart = 0;
+  1228  0279  01D0               	clrf	_G_ShotStart
+  1229  027A  01D1               	clrf	_G_ShotStart+1
+  1230  027B  01D2               	clrf	_G_ShotStart+2
+  1231  027C  01D3               	clrf	_G_ShotStart+3
+  1232  027D                     l50
+  1233                           ;ShotTimer.c: 584: }
+  1234  027D  138B               	bcf	11,7
+  1235                           ;ShotTimer.c: 586: G_HighShot = 0;
+  1236  027E  1283               	bcf	3,5
+  1237  027F  1303               	bcf	3,6	;carry unused
+  1238  0280  01A1               	clrf	_G_HighShot
+  1239                           ;ShotTimer.c: 587: G_UHigh = G_High;
+  1240  0281  0826               	movf	_G_High,w
+  1241  0282  00B2               	movwf	_G_UHigh
+  1242  0283  0827               	movf	_G_High+1,w
+  1243  0284  00B3               	movwf	_G_UHigh+1
+  1244                           ;ShotTimer.c: 588: G_Low = (WORD) G_UHigh-400;
+  1245  0285  3070               	movlw	112
+  1246  0286  0732               	addwf	_G_UHigh,w
+  1247  0287  00AE               	movwf	_G_Low
+  1248  0288  30FE               	movlw	254
+  1249  0289  1803               	btfsc	3,0
+  1250  028A  30FF               	movlw	255
+  1251  028B  0733               	addwf	_G_UHigh+1,w
+  1252  028C  00AF               	movwf	_G_Low+1
+  1253                           ;ShotTimer.c: 589: (GIE = 1);
+  1254  028D  178B               	bsf	11,7
+  1255                           ;ShotTimer.c: 590: asm("nop");
+  1256  028E  0000               	nop	;#
+  1257  028F                     l48
+  1258                           ;ShotTimer.c: 591: }
+  1259  028F  1283               	bcf	3,5
+  1260  0290  01A4               	clrf	_G_Refresh
+  1261  0291  0AA4               	incf	_G_Refresh
+  1262                           ;ShotTimer.c: 594: (GIE = 0);
+  1263  0292  138B               	bcf	11,7
+  1264                           ;ShotTimer.c: 595: G_PowerSW_FP = G_TickCount;
+  1265  0293  0854               	movf	_G_TickCount,w	;volatile
+  1266  0294  00B8               	movwf	_G_PowerSW_FP
+  1267  0295  0855               	movf	_G_TickCount+1,w	;volatile
+  1268  0296  00B9               	movwf	_G_PowerSW_FP+1
+  1269  0297  0856               	movf	_G_TickCount+2,w	;volatile
+  1270  0298  00BA               	movwf	_G_PowerSW_FP+2
+  1271  0299  0857               	movf	_G_TickCount+3,w	;volatile
+  1272  029A  00BB               	movwf	_G_PowerSW_FP+3
+  1273                           ;ShotTimer.c: 596: (GIE = 1);
+  1274  029B  178B               	bsf	11,7
+  1275                           ;ShotTimer.c: 597: asm("nop");
+  1276  029C  0000               	nop	;#
+  1277  029D                     l47
+  1278                           ;ShotTimer.c: 598: }
+  1279  029D  138B               	bcf	11,7
+  1280                           ;ShotTimer.c: 601: if (G_TickCount > G_PowerSW_
+      +                          FP+(1000000*2))
+  1281  029E  3080               	movlw	128
+  1282  029F  00F0               	movwf	btemp
+  1283  02A0  3084               	movlw	132
+  1284  02A1  00F1               	movwf	btemp+1
+  1285  02A2  301E               	movlw	30
+  1286  02A3  00F2               	movwf	btemp+2
+  1287  02A4  01F3               	clrf	btemp+3
+  1288  02A5  0870               	movf	btemp,w
+  1289  02A6  0738               	addwf	_G_PowerSW_FP,w
+  1290  02A7  00F4               	movwf	btemp+4
+  1291  02A8  0839               	movf	_G_PowerSW_FP+1,w
+  1292  02A9  00F5               	movwf	btemp+5
+  1293  02AA  0871               	movf	btemp+1,w
+  1294  02AB  1803               	btfsc	3,0
+  1295  02AC  0F71               	incfsz	btemp+1,w
+  1296  02AD  07F5               	addwf	btemp+5
+  1297  02AE  083A               	movf	_G_PowerSW_FP+2,w
+  1298  02AF  00F6               	movwf	btemp+6
+  1299  02B0  0872               	movf	btemp+2,w
+  1300  02B1  1803               	btfsc	3,0
+  1301  02B2  0F72               	incfsz	btemp+2,w
+  1302  02B3  07F6               	addwf	btemp+6
+  1303  02B4  083B               	movf	_G_PowerSW_FP+3,w
+  1304  02B5  00F7               	movwf	btemp+7
+  1305  02B6  0873               	movf	btemp+3,w
+  1306  02B7  1803               	btfsc	3,0
+  1307  02B8  0F73               	incfsz	btemp+3,w
+  1308  02B9  07F7               	addwf	btemp+7
+  1309  02BA  0857               	movf	_G_TickCount+3,w	;volatile
+  1310  02BB  0277               	subwf	btemp+7,w
+  1311  02BC  1D03               	btfss	3,2
+  1312  02BD  2AC8               	goto	u385
+  1313  02BE  0856               	movf	_G_TickCount+2,w	;volatile
+  1314  02BF  0276               	subwf	btemp+6,w
+  1315  02C0  1D03               	btfss	3,2
+  1316  02C1  2AC8               	goto	u385
+  1317  02C2  0855               	movf	_G_TickCount+1,w	;volatile
+  1318  02C3  0275               	subwf	btemp+5,w
+  1319  02C4  1D03               	btfss	3,2
+  1320  02C5  2AC8               	goto	u385
+  1321  02C6  0854               	movf	_G_TickCount,w	;volatile
+  1322  02C7  0274               	subwf	btemp+4,w
+  1323  02C8                     u385
+  1324                           ;ShotTimer.c: 602: {
+  1325  02C8  178B               	bsf	11,7
+  1326                           ;ShotTimer.c: 604: asm("nop");
+  1327  02C9  0000               	nop	;#
+  1328  02CA  1803               	btfsc	3,0
+  1329  02CB  2AE1               	goto	l61
+  1330                           ;ShotTimer.c: 605: G_PowerSW_FP = 0;
+  1331  02CC  01B8               	clrf	_G_PowerSW_FP
+  1332  02CD  01B9               	clrf	_G_PowerSW_FP+1
+  1333  02CE  01BA               	clrf	_G_PowerSW_FP+2
+  1334  02CF  01BB               	clrf	_G_PowerSW_FP+3
+  1335                           ;ShotTimer.c: 608: ShutDown();
+  1336  02D0  118A  2193  118A   	fcall	_ShutDown
+  1337                           ;ShotTimer.c: 609: }
+  1338  02D3  178B               	bsf	11,7
+  1339                           ;ShotTimer.c: 611: asm("nop");
+  1340  02D4  0000               	nop	;#
+  1341                           ;ShotTimer.c: 612: }
+  1342  02D5  2AE1               	goto	l61
+  1343  02D6                     l44
+  1344                           ;ShotTimer.c: 614: else
+  1345  02D6  01B8               	clrf	_G_PowerSW_FP
+  1346  02D7  01B9               	clrf	_G_PowerSW_FP+1
+  1347  02D8  01BA               	clrf	_G_PowerSW_FP+2
+  1348  02D9  01BB               	clrf	_G_PowerSW_FP+3
+  1349                           ;ShotTimer.c: 618: if (G_Mode == 0)
+  1350  02DA  1683               	bsf	3,5
+  1351  02DB  08A1               	movf	_G_Mode^(0+128)
+  1352  02DC  1D03               	btfss	3,2
+  1353  02DD  2AE1               	goto	l61
+  1354                           ;ShotTimer.c: 619: {
+  1355  02DE  118A  2193  118A   	fcall	_ShutDown
+  1356  02E1                     l61
+  1357                           ;ShotTimer.c: 621: }
+  1358  02E1  138B               	bcf	11,7
+  1359                           ;ShotTimer.c: 626: if (G_TickCount-G_Seconds > 
+      +                          60000000)
+  1360  02E2  1283               	bcf	3,5
+  1361  02E3  0840               	movf	_G_Seconds,w
+  1362  02E4  0254               	subwf	_G_TickCount,w	;volatile
+  1363  02E5  00F0               	movwf	btemp
+  1364  02E6  0855               	movf	_G_TickCount+1,w	;volatile
+  1365  02E7  00F1               	movwf	btemp+1
+  1366  02E8  0841               	movf	_G_Seconds+1,w
+  1367  02E9  1C03               	btfss	3,0
+  1368  02EA  0F41               	incfsz	_G_Seconds+1,w
+  1369  02EB  02F1               	subwf	btemp+1
+  1370  02EC  0856               	movf	_G_TickCount+2,w	;volatile
+  1371  02ED  00F2               	movwf	btemp+2
+  1372  02EE  0842               	movf	_G_Seconds+2,w
+  1373  02EF  1C03               	btfss	3,0
+  1374  02F0  0F42               	incfsz	_G_Seconds+2,w
+  1375  02F1  02F2               	subwf	btemp+2
+  1376  02F2  0857               	movf	_G_TickCount+3,w	;volatile
+  1377  02F3  00F3               	movwf	btemp+3
+  1378  02F4  0843               	movf	_G_Seconds+3,w
+  1379  02F5  1C03               	btfss	3,0
+  1380  02F6  0F43               	incfsz	_G_Seconds+3,w
+  1381  02F7  02F3               	subwf	btemp+3
+  1382  02F8  3003               	movlw	3
+  1383  02F9  0273               	subwf	btemp+3,w
+  1384  02FA  1D03               	btfss	3,2
+  1385  02FB  2B06               	goto	u405
+  1386  02FC  3093               	movlw	147
+  1387  02FD  0272               	subwf	btemp+2,w
+  1388  02FE  1D03               	btfss	3,2
+  1389  02FF  2B06               	goto	u405
+  1390  0300  3087               	movlw	135
+  1391  0301  0271               	subwf	btemp+1,w
+  1392  0302  1D03               	btfss	3,2
+  1393  0303  2B06               	goto	u405
+  1394  0304  3001               	movlw	1
+  1395  0305  0270               	subwf	btemp,w
+  1396  0306                     u405
+  1397                           ;ShotTimer.c: 627: {
+  1398  0306  178B               	bsf	11,7
+  1399                           ;ShotTimer.c: 629: asm("nop");
+  1400  0307  0000               	nop	;#
+  1401  0308  1C03               	btfss	3,0
+  1402  0309  2B20               	goto	L30
+  1403                           ;ShotTimer.c: 630: G_Minutes += 1;
+  1404  030A  0AA3               	incf	_G_Minutes
+  1405                           ;ShotTimer.c: 631: G_Refresh = 1;
+  1406  030B  01A4               	clrf	_G_Refresh
+  1407  030C  0AA4               	incf	_G_Refresh
+  1408                           ;ShotTimer.c: 632: (GIE = 0);
+  1409  030D  138B               	bcf	11,7
+  1410                           ;ShotTimer.c: 633: G_Seconds = G_TickCount;
+  1411  030E  0854               	movf	_G_TickCount,w	;volatile
+  1412  030F  00C0               	movwf	_G_Seconds
+  1413  0310  0855               	movf	_G_TickCount+1,w	;volatile
+  1414  0311  00C1               	movwf	_G_Seconds+1
+  1415  0312  0856               	movf	_G_TickCount+2,w	;volatile
+  1416  0313  00C2               	movwf	_G_Seconds+2
+  1417  0314  0857               	movf	_G_TickCount+3,w	;volatile
+  1418  0315  00C3               	movwf	_G_Seconds+3
+  1419                           ;ShotTimer.c: 634: G_Refresh_LastCheck = G_Tick
+      +                          Count;
+  1420  0316  0854               	movf	_G_TickCount,w	;volatile
+  1421  0317  00BC               	movwf	_G_Refresh_LastCheck
+  1422  0318  0855               	movf	_G_TickCount+1,w	;volatile
+  1423  0319  00BD               	movwf	_G_Refresh_LastCheck+1
+  1424  031A  0856               	movf	_G_TickCount+2,w	;volatile
+  1425  031B  00BE               	movwf	_G_Refresh_LastCheck+2
+  1426  031C  0857               	movf	_G_TickCount+3,w	;volatile
+  1427  031D  00BF               	movwf	_G_Refresh_LastCheck+3
+  1428                           ;ShotTimer.c: 635: }
+  1429  031E  178B               	bsf	11,7
+  1430                           ;ShotTimer.c: 637: asm("nop");
+  1431  031F  0000               	nop	;#
+  1432  0320                     L30
+  1433                           ;ShotTimer.c: 638: if (G_Setting == 5)
+  1434  0320  1683               	bsf	3,5
+  1435  0321  0822               	movf	_G_Setting^(0+128),w
+  1436  0322  3A05               	xorlw	5
+  1437  0323  1D03               	btfss	3,2
+  1438  0324  2B62               	goto	l64
+  1439                           ;ShotTimer.c: 639: {
+  1440  0325  138B               	bcf	11,7
+  1441                           ;ShotTimer.c: 641: if (G_TickCount > G_Refresh_
+      +                          LastCheck+1000000)
+  1442  0326  3040               	movlw	64
+  1443  0327  00F0               	movwf	btemp
+  1444  0328  3042               	movlw	66
+  1445  0329  00F1               	movwf	btemp+1
+  1446  032A  300F               	movlw	15
+  1447  032B  00F2               	movwf	btemp+2
+  1448  032C  01F3               	clrf	btemp+3
+  1449  032D  0870               	movf	btemp,w
+  1450  032E  1283               	bcf	3,5
+  1451  032F  073C               	addwf	_G_Refresh_LastCheck,w
+  1452  0330  00F4               	movwf	btemp+4
+  1453  0331  083D               	movf	_G_Refresh_LastCheck+1,w
+  1454  0332  00F5               	movwf	btemp+5
+  1455  0333  0871               	movf	btemp+1,w
+  1456  0334  1803               	btfsc	3,0
+  1457  0335  0F71               	incfsz	btemp+1,w
+  1458  0336  07F5               	addwf	btemp+5
+  1459  0337  083E               	movf	_G_Refresh_LastCheck+2,w
+  1460  0338  00F6               	movwf	btemp+6
+  1461  0339  0872               	movf	btemp+2,w
+  1462  033A  1803               	btfsc	3,0
+  1463  033B  0F72               	incfsz	btemp+2,w
+  1464  033C  07F6               	addwf	btemp+6
+  1465  033D  083F               	movf	_G_Refresh_LastCheck+3,w
+  1466  033E  00F7               	movwf	btemp+7
+  1467  033F  0873               	movf	btemp+3,w
+  1468  0340  1803               	btfsc	3,0
+  1469  0341  0F73               	incfsz	btemp+3,w
+  1470  0342  07F7               	addwf	btemp+7
+  1471  0343  0857               	movf	_G_TickCount+3,w	;volatile
+  1472  0344  0277               	subwf	btemp+7,w
+  1473  0345  1D03               	btfss	3,2
+  1474  0346  2B51               	goto	u425
+  1475  0347  0856               	movf	_G_TickCount+2,w	;volatile
+  1476  0348  0276               	subwf	btemp+6,w
+  1477  0349  1D03               	btfss	3,2
+  1478  034A  2B51               	goto	u425
+  1479  034B  0855               	movf	_G_TickCount+1,w	;volatile
+  1480  034C  0275               	subwf	btemp+5,w
+  1481  034D  1D03               	btfss	3,2
+  1482  034E  2B51               	goto	u425
+  1483  034F  0854               	movf	_G_TickCount,w	;volatile
+  1484  0350  0274               	subwf	btemp+4,w
+  1485  0351                     u425
+  1486                           ;ShotTimer.c: 642: {
+  1487  0351  178B               	bsf	11,7
+  1488                           ;ShotTimer.c: 644: asm("nop");
+  1489  0352  0000               	nop	;#
+  1490  0353  1803               	btfsc	3,0
+  1491  0354  2B62               	goto	l64
+  1492                           ;ShotTimer.c: 645: G_Refresh = 1;
+  1493  0355  01A4               	clrf	_G_Refresh
+  1494  0356  0AA4               	incf	_G_Refresh
+  1495                           ;ShotTimer.c: 646: (GIE = 0);
+  1496  0357  138B               	bcf	11,7
+  1497                           ;ShotTimer.c: 647: G_Refresh_LastCheck = G_Tick
+      +                          Count;
+  1498  0358  0854               	movf	_G_TickCount,w	;volatile
+  1499  0359  00BC               	movwf	_G_Refresh_LastCheck
+  1500  035A  0855               	movf	_G_TickCount+1,w	;volatile
+  1501  035B  00BD               	movwf	_G_Refresh_LastCheck+1
+  1502  035C  0856               	movf	_G_TickCount+2,w	;volatile
+  1503  035D  00BE               	movwf	_G_Refresh_LastCheck+2
+  1504  035E  0857               	movf	_G_TickCount+3,w	;volatile
+  1505  035F  00BF               	movwf	_G_Refresh_LastCheck+3
+  1506                           ;ShotTimer.c: 648: }
+  1507  0360  178B               	bsf	11,7
+  1508                           ;ShotTimer.c: 650: asm("nop");
+  1509  0361  0000               	nop	;#
+  1510  0362                     l64
+  1511                           ;ShotTimer.c: 651: }
+  1512  0362  1283               	bcf	3,5
+  1513  0363  1886               	btfsc	6,1
+  1514  0364  2BBA               	goto	l66
+  1515                           ;ShotTimer.c: 655: {
+  1516  0365  138B               	bcf	11,7
+  1517  0366  0854               	movf	_G_TickCount,w	;volatile
+  1518  0367  00B4               	movwf	_G_Last_Action
+  1519  0368  0855               	movf	_G_TickCount+1,w	;volatile
+  1520  0369  00B5               	movwf	_G_Last_Action+1
+  1521  036A  0856               	movf	_G_TickCount+2,w	;volatile
+  1522  036B  00B6               	movwf	_G_Last_Action+2
+  1523  036C  0857               	movf	_G_TickCount+3,w	;volatile
+  1524  036D  00B7               	movwf	_G_Last_Action+3
+  1525  036E  178B               	bsf	11,7
+  1526  036F  0000               	nop	;#
+  1527                           ;ShotTimer.c: 658: if (!funcpress)
+  1528  0370  08A0               	movf	F502
+  1529  0371  1D03               	btfss	3,2
+  1530  0372  2BBB               	goto	l72
+  1531                           ;ShotTimer.c: 659: {
+  1532  0373  01A0               	clrf	F502
+  1533  0374  0AA0               	incf	F502
+  1534                           ;ShotTimer.c: 662: G_Setting++;
+  1535  0375  1683               	bsf	3,5
+  1536  0376  0AA2               	incf	_G_Setting^(0+128)
+  1537                           ;ShotTimer.c: 664: if (G_ShotCount)
+  1538  0377  1283               	bcf	3,5
+  1539  0378  0831               	movf	_G_ShotCount+1,w
+  1540  0379  0430               	iorwf	_G_ShotCount,w
+  1541                           ;ShotTimer.c: 665: {
+  1542  037A  1683               	bsf	3,5
+  1543  037B  1903               	btfsc	3,2
+  1544  037C  2BAF               	goto	L31
+  1545  037D  0822               	movf	_G_Setting^(0+128),w
+  1546  037E  00F0               	movwf	btemp
+  1547  037F  01F1               	clrf	btemp+1
+  1548  0380  0820               	movf	_G_MaxSetting^(0+128),w
+  1549  0381  00F2               	movwf	btemp+2
+  1550  0382  01F3               	clrf	btemp+3
+  1551  0383  1283               	bcf	3,5
+  1552  0384  0830               	movf	_G_ShotCount,w
+  1553  0385  07F2               	addwf	btemp+2
+  1554  0386  1803               	btfsc	3,0
+  1555  0387  0AF3               	incf	btemp+3
+  1556  0388  0831               	movf	_G_ShotCount+1,w
+  1557  0389  07F3               	addwf	btemp+3
+  1558  038A  30FF               	movlw	-1
+  1559  038B  07F2               	addwf	btemp+2
+  1560  038C  1C03               	btfss	3,0
+  1561  038D  07F3               	addwf	btemp+3
+  1562  038E  0871               	movf	btemp+1,w
+  1563  038F  0273               	subwf	btemp+3,w
+  1564  0390  1D03               	btfss	3,2
+  1565  0391  2B94               	goto	u465
+  1566  0392  0870               	movf	btemp,w
+  1567  0393  0272               	subwf	btemp+2,w
+  1568  0394                     u465
+  1569  0394  1683               	bsf	3,5
+  1570  0395  1C03               	btfss	3,0
+  1571  0396  2BAD               	goto	L32
+  1572  0397  0822               	movf	_G_Setting^(0+128),w
+  1573  0398  00F0               	movwf	btemp
+  1574  0399  01F1               	clrf	btemp+1
+  1575  039A  0820               	movf	_G_MaxSetting^(0+128),w
+  1576  039B  00F2               	movwf	btemp+2
+  1577  039C  01F3               	clrf	btemp+3
+  1578  039D  3019               	movlw	25
+  1579  039E  07F2               	addwf	btemp+2
+  1580  039F  1803               	btfsc	3,0
+  1581  03A0  0AF3               	incf	btemp+3
+  1582  03A1  0873               	movf	btemp+3,w
+  1583  03A2  3A80               	xorlw	128
+  1584  03A3  00F4               	movwf	btemp+4
+  1585  03A4  0871               	movf	btemp+1,w
+  1586  03A5  3A80               	xorlw	128
+  1587  03A6  0274               	subwf	btemp+4,w
+  1588  03A7  1D03               	btfss	3,2
+  1589  03A8  2BAB               	goto	u475
+  1590  03A9  0870               	movf	btemp,w
+  1591  03AA  0272               	subwf	btemp+2,w
+  1592  03AB                     u475
+  1593  03AB  1803               	btfsc	3,0
+  1594  03AC  2BB5               	goto	l70
+  1595                           ;ShotTimer.c: 667: G_Setting = 1;
+  1596  03AD                     L32
+  1597  03AD  1303               	bcf	3,6	;carry unused
+  1598  03AE  2BB3               	goto	u490
+  1599                           ;ShotTimer.c: 668: }
+  1600                           ;ShotTimer.c: 669: else
+  1601  03AF                     L31
+  1602  03AF  0822               	movf	_G_Setting^(0+128),w
+  1603  03B0  0220               	subwf	_G_MaxSetting^(0+128),w
+  1604  03B1  1803               	btfsc	3,0
+  1605  03B2  2BB5               	goto	l70
+  1606  03B3                     u490
+  1607                           ;ShotTimer.c: 672: G_Setting = 1;
+  1608  03B3  01A2               	clrf	_G_Setting^(0+128)
+  1609  03B4  0AA2               	incf	_G_Setting^(0+128)
+  1610  03B5                     l70
+  1611                           ;ShotTimer.c: 673: }
+  1612  03B5  1283               	bcf	3,5
+  1613  03B6  1303               	bcf	3,6	;carry unused
+  1614  03B7  01A4               	clrf	_G_Refresh
+  1615  03B8  0AA4               	incf	_G_Refresh
+  1616                           ;ShotTimer.c: 676: }
+  1617  03B9  2BBB               	goto	l72
+  1618  03BA                     l66
+  1619                           ;ShotTimer.c: 678: else
+  1620  03BA  01A0               	clrf	F502
+  1621  03BB                     l72
+  1622                           ;ShotTimer.c: 681: }
+  1623  03BB  08A4               	movf	_G_Refresh
+  1624  03BC  1903               	btfsc	3,2
+  1625  03BD  2D84               	goto	l73
+  1626                           ;ShotTimer.c: 685: {
+  1627  03BE  1683               	bsf	3,5
+  1628  03BF  0B21               	decfsz	_G_Mode^(0+128),w
+  1629  03C0  2D61               	goto	l74
+  1630                           ;ShotTimer.c: 687: {
+  1631  03C1  0B22               	decfsz	_G_Setting^(0+128),w
+  1632  03C2  2BFF               	goto	l75
+  1633                           ;ShotTimer.c: 689: {
+  1634  03C3  118A  212A         	fcall	_lcd_clear
+  1635                           ;ShotTimer.c: 691: lcd_goto(0);
+  1636  03C5  3000               	movlw	0
+  1637  03C6  118A  2124         	fcall	_lcd_goto
+  1638                           ;ShotTimer.c: 692: lcd_puts("Fastest MS/BPS");
+  1639  03C8  308B               	movlw	low u59
+  1640  03C9  00E9               	movwf	?_lcd_puts
+  1641  03CA  3000               	movlw	high u59
+  1642  03CB  00EA               	movwf	?_lcd_puts+1
+  1643  03CC  158A  2697         	fcall	_lcd_puts
+  1644                           ;ShotTimer.c: 693: lcd_goto(0x40);
+  1645  03CE  3040               	movlw	64
+  1646  03CF  118A  2124         	fcall	_lcd_goto
+  1647                           ;ShotTimer.c: 694: lcd_puts("M:");
+  1648  03D1  30CD               	movlw	low u69
+  1649  03D2  00E9               	movwf	?_lcd_puts
+  1650  03D3  3000               	movlw	high u69
+  1651  03D4  00EA               	movwf	?_lcd_puts+1
+  1652  03D5  158A  2697         	fcall	_lcd_puts
+  1653                           ;ShotTimer.c: 695: lcd_writefloat((float)(G_Set
+      +                          ting_Fastest/1000.0f));
+  1654  03D7  0844               	movf	_G_Setting_Fastest,w
+  1655  03D8  00F0               	movwf	btemp
+  1656  03D9  0845               	movf	_G_Setting_Fastest+1,w
+  1657  03DA  00F1               	movwf	btemp+1
+  1658  03DB  0846               	movf	_G_Setting_Fastest+2,w
+  1659  03DC  00F2               	movwf	btemp+2
+  1660  03DD  0847               	movf	_G_Setting_Fastest+3,w
+  1661  03DE  00F3               	movwf	btemp+3
+  1662  03DF  118A  271F         	fcall	lltoft
+  1663  03E1  01F3               	clrf	btemp+3
+  1664  03E2  307A               	movlw	122
+  1665  03E3  00F4               	movwf	btemp+4
+  1666  03E4  3044               	movlw	68
+  1667  03E5  00F5               	movwf	btemp+5
+  1668  03E6  118A  267E         	fcall	ftdiv
+  1669  03E8  0870               	movf	btemp,w
+  1670  03E9  00DB               	movwf	?_lcd_writefloat
+  1671  03EA  0871               	movf	btemp+1,w
+  1672  03EB  00DC               	movwf	?_lcd_writefloat+1
+  1673  03EC  0872               	movf	btemp+2,w
+  1674  03ED  00DD               	movwf	?_lcd_writefloat+2
+  1675  03EE  158A  27C3         	fcall	_lcd_writefloat
+  1676                           ;ShotTimer.c: 696: lcd_puts("  B:");
+  1677  03F0  30D0               	movlw	low u79
+  1678  03F1  00E9               	movwf	?_lcd_puts
+  1679  03F2  3000               	movlw	high u79
+  1680  03F3  00EA               	movwf	?_lcd_puts+1
+  1681  03F4  158A  2697  118A   	fcall	_lcd_puts
+  1682                           ;ShotTimer.c: 697: lcd_writefloat((float)(10000
+      +                          00.0f/G_Setting_Fastest));
+  1683  03F7  0844               	movf	_G_Setting_Fastest,w
+  1684  03F8  00F0               	movwf	btemp
+  1685  03F9  0845               	movf	_G_Setting_Fastest+1,w
+  1686  03FA  00F1               	movwf	btemp+1
+  1687  03FB  0846               	movf	_G_Setting_Fastest+2,w
+  1688  03FC  00F2               	movwf	btemp+2
+  1689  03FD  0847               	movf	_G_Setting_Fastest+3,w
+  1690  03FE  2C1E               	goto	L21
+  1691                           ;ShotTimer.c: 698: }
+  1692  03FF                     l75
+  1693                           ;ShotTimer.c: 699: else if (G_Setting == 2)
+  1694  03FF  0822               	movf	_G_Setting^(0+128),w
+  1695  0400  3A02               	xorlw	2
+  1696  0401  1D03               	btfss	3,2
+  1697  0402  2C2F               	goto	l77
+  1698                           ;ShotTimer.c: 700: {
+  1699  0403  118A  212A         	fcall	_lcd_clear
+  1700                           ;ShotTimer.c: 702: lcd_goto(0);
+  1701  0405  3000               	movlw	0
+  1702  0406  118A  2124         	fcall	_lcd_goto
+  1703                           ;ShotTimer.c: 703: lcd_puts("Slowest BPS");
+  1704  0408  309A               	movlw	low u89
+  1705  0409  00E9               	movwf	?_lcd_puts
+  1706  040A  3000               	movlw	high u89
+  1707  040B  00EA               	movwf	?_lcd_puts+1
+  1708  040C  158A  2697         	fcall	_lcd_puts
+  1709                           ;ShotTimer.c: 704: lcd_goto(0x40);
+  1710  040E  3040               	movlw	64
+  1711  040F  118A  2124         	fcall	_lcd_goto
+  1712                           ;ShotTimer.c: 705: lcd_puts("BPS:");
+  1713  0411  30C8               	movlw	low u99
+  1714  0412  00E9               	movwf	?_lcd_puts
+  1715  0413  3000               	movlw	high u99
+  1716  0414  00EA               	movwf	?_lcd_puts+1
+  1717  0415  158A  2697         	fcall	_lcd_puts
+  1718                           ;ShotTimer.c: 706: lcd_writefloat((float)(10000
+      +                          00.0f/G_Setting_Slowest));
+  1719  0417  0848               	movf	_G_Setting_Slowest,w
+  1720  0418  00F0               	movwf	btemp
+  1721  0419  0849               	movf	_G_Setting_Slowest+1,w
+  1722  041A  00F1               	movwf	btemp+1
+  1723  041B  084A               	movf	_G_Setting_Slowest+2,w
+  1724  041C  00F2               	movwf	btemp+2
+  1725  041D  084B               	movf	_G_Setting_Slowest+3,w
+  1726  041E                     L21
+  1727  041E  00F3               	movwf	btemp+3
+  1728  041F  118A  271F  118A   	fcall	lltoft
+  1729  0422  0870               	movf	btemp,w
+  1730  0423  00F3               	movwf	btemp+3
+  1731  0424  0871               	movf	btemp+1,w
+  1732  0425  00F4               	movwf	btemp+4
+  1733  0426  0872               	movf	btemp+2,w
+  1734  0427  00F5               	movwf	btemp+5
+  1735  0428  3024               	movlw	36
+  1736  0429  00F0               	movwf	btemp
+  1737  042A  3074               	movlw	116
+  1738  042B  00F1               	movwf	btemp+1
+  1739  042C  3049               	movlw	73
+  1740  042D  00F2               	movwf	btemp+2
+  1741  042E  2C89               	goto	L22
+  1742                           ;ShotTimer.c: 707: }
+  1743  042F                     l77
+  1744                           ;ShotTimer.c: 708: else if (G_Setting == 3)
+  1745  042F  0822               	movf	_G_Setting^(0+128),w
+  1746  0430  3A03               	xorlw	3
+  1747  0431  1D03               	btfss	3,2
+  1748  0432  2C8E               	goto	l79
+  1749                           ;ShotTimer.c: 709: {
+  1750  0433  118A  212A         	fcall	_lcd_clear
+  1751                           ;ShotTimer.c: 711: lcd_goto(0);
+  1752  0435  3000               	movlw	0
+  1753  0436  118A  2124         	fcall	_lcd_goto
+  1754                           ;ShotTimer.c: 712: lcd_puts("Average BPS");
+  1755  0438  30A6               	movlw	low u109
+  1756  0439  00E9               	movwf	?_lcd_puts
+  1757  043A  3000               	movlw	high u109
+  1758  043B  00EA               	movwf	?_lcd_puts+1
+  1759  043C  158A  2697         	fcall	_lcd_puts
+  1760                           ;ShotTimer.c: 713: lcd_goto(0x40);
+  1761  043E  3040               	movlw	64
+  1762  043F  118A  2124         	fcall	_lcd_goto
+  1763                           ;ShotTimer.c: 714: lcd_puts("BPS:");
+  1764  0441  30C8               	movlw	low u119
+  1765  0442  00E9               	movwf	?_lcd_puts
+  1766  0443  3000               	movlw	high u119
+  1767  0444  00EA               	movwf	?_lcd_puts+1
+  1768  0445  158A  2697         	fcall	_lcd_puts
+  1769                           ;ShotTimer.c: 715: lcd_writefloat((float)(((100
+      +                          0000.0f/G_Setting_Fastest)+(1000000.0f/G_Settin
+      +                          g_Slowest))/2));
+  1770  0447  0848               	movf	_G_Setting_Slowest,w
+  1771  0448  00F0               	movwf	btemp
+  1772  0449  0849               	movf	_G_Setting_Slowest+1,w
+  1773  044A  00F1               	movwf	btemp+1
+  1774  044B  084A               	movf	_G_Setting_Slowest+2,w
+  1775  044C  00F2               	movwf	btemp+2
+  1776  044D  084B               	movf	_G_Setting_Slowest+3,w
+  1777  044E  00F3               	movwf	btemp+3
+  1778  044F  118A  271F         	fcall	lltoft
+  1779  0451  0870               	movf	btemp,w
+  1780  0452  00F3               	movwf	btemp+3
+  1781  0453  0871               	movf	btemp+1,w
+  1782  0454  00F4               	movwf	btemp+4
+  1783  0455  0872               	movf	btemp+2,w
+  1784  0456  00F5               	movwf	btemp+5
+  1785  0457  3024               	movlw	36
+  1786  0458  00F0               	movwf	btemp
+  1787  0459  3074               	movlw	116
+  1788  045A  00F1               	movwf	btemp+1
+  1789  045B  3049               	movlw	73
+  1790  045C  00F2               	movwf	btemp+2
+  1791  045D  118A  267E         	fcall	ftdiv
+  1792  045F  0870               	movf	btemp,w
+  1793  0460  00D8               	movwf	?a_main
+  1794  0461  0871               	movf	btemp+1,w
+  1795  0462  00D9               	movwf	?a_main+1
+  1796  0463  0872               	movf	btemp+2,w
+  1797  0464  00DA               	movwf	?a_main+2
+  1798  0465  0844               	movf	_G_Setting_Fastest,w
+  1799  0466  00F0               	movwf	btemp
+  1800  0467  0845               	movf	_G_Setting_Fastest+1,w
+  1801  0468  00F1               	movwf	btemp+1
+  1802  0469  0846               	movf	_G_Setting_Fastest+2,w
+  1803  046A  00F2               	movwf	btemp+2
+  1804  046B  0847               	movf	_G_Setting_Fastest+3,w
+  1805  046C  00F3               	movwf	btemp+3
+  1806  046D  118A  271F         	fcall	lltoft
+  1807  046F  0870               	movf	btemp,w
+  1808  0470  00F3               	movwf	btemp+3
+  1809  0471  0871               	movf	btemp+1,w
+  1810  0472  00F4               	movwf	btemp+4
+  1811  0473  0872               	movf	btemp+2,w
+  1812  0474  00F5               	movwf	btemp+5
+  1813  0475  3024               	movlw	36
+  1814  0476  00F0               	movwf	btemp
+  1815  0477  3074               	movlw	116
+  1816  0478  00F1               	movwf	btemp+1
+  1817  0479  3049               	movlw	73
+  1818  047A  00F2               	movwf	btemp+2
+  1819  047B  118A  267E         	fcall	ftdiv
+  1820  047D  0858               	movf	?a_main,w
+  1821  047E  00F3               	movwf	btemp+3
+  1822  047F  0859               	movf	?a_main+1,w
+  1823  0480  00F4               	movwf	btemp+4
+  1824  0481  085A               	movf	?a_main+2,w
+  1825  0482  00F5               	movwf	btemp+5
+  1826  0483  118A  264F         	fcall	ftadd
+  1827  0485  01F3               	clrf	btemp+3
+  1828  0486  01F4               	clrf	btemp+4
+  1829  0487  3040               	movlw	64
+  1830  0488  00F5               	movwf	btemp+5
+  1831  0489                     L22
+  1832  0489  118A  267E  118A   	fcall	ftdiv
+  1833  048C  0870               	movf	btemp,w
+  1834  048D  2D58               	goto	L23
+  1835                           ;ShotTimer.c: 716: }
+  1836  048E                     l79
+  1837                           ;ShotTimer.c: 717: else if (G_Setting == 4)
+  1838  048E  0822               	movf	_G_Setting^(0+128),w
+  1839  048F  3A04               	xorlw	4
+  1840  0490  1D03               	btfss	3,2
+  1841  0491  2CA9               	goto	l81
+  1842                           ;ShotTimer.c: 718: {
+  1843  0492  118A  212A         	fcall	_lcd_clear
+  1844                           ;ShotTimer.c: 720: lcd_goto(0);
+  1845  0494  3000               	movlw	0
+  1846  0495  118A  2124         	fcall	_lcd_goto
+  1847                           ;ShotTimer.c: 721: lcd_puts("ShotCounter");
+  1848  0497  3063               	movlw	low u129
+  1849  0498  00E9               	movwf	?_lcd_puts
+  1850  0499  3000               	movlw	high u129
+  1851  049A  00EA               	movwf	?_lcd_puts+1
+  1852  049B  158A  2697         	fcall	_lcd_puts
+  1853                           ;ShotTimer.c: 722: lcd_goto(0x40);
+  1854  049D  3040               	movlw	64
+  1855  049E  118A  2124         	fcall	_lcd_goto
+  1856                           ;ShotTimer.c: 723: lcd_puts("Shots:");
+  1857  04A0  30B2               	movlw	low u139
+  1858  04A1  00E9               	movwf	?_lcd_puts
+  1859  04A2  3000               	movlw	high u139
+  1860  04A3  00EA               	movwf	?_lcd_puts+1
+  1861  04A4  158A  2697  118A   	fcall	_lcd_puts
+  1862                           ;ShotTimer.c: 724: lcd_writeint((BYTE)G_ShotCou
+      +                          nt, 0);
+  1863  04A7  0830               	movf	_G_ShotCount,w
+  1864  04A8  2D7C               	goto	L24
+  1865                           ;ShotTimer.c: 725: }
+  1866  04A9                     l81
+  1867                           ;ShotTimer.c: 726: else if (G_Setting == 5)
+  1868  04A9  0822               	movf	_G_Setting^(0+128),w
+  1869  04AA  3A05               	xorlw	5
+  1870  04AB  1D03               	btfss	3,2
+  1871  04AC  2CED               	goto	l83
+  1872                           ;ShotTimer.c: 727: {
+  1873  04AD  118A  212A         	fcall	_lcd_clear
+  1874                           ;ShotTimer.c: 729: lcd_goto(0);
+  1875  04AF  3000               	movlw	0
+  1876  04B0  118A  2124         	fcall	_lcd_goto
+  1877                           ;ShotTimer.c: 730: lcd_puts("Game Timer");
+  1878  04B2  306F               	movlw	low u149
+  1879  04B3  00E9               	movwf	?_lcd_puts
+  1880  04B4  3000               	movlw	high u149
+  1881  04B5  00EA               	movwf	?_lcd_puts+1
+  1882  04B6  158A  2697         	fcall	_lcd_puts
+  1883                           ;ShotTimer.c: 731: lcd_goto(0x40);
+  1884  04B8  3040               	movlw	64
+  1885  04B9  118A  2124         	fcall	_lcd_goto
+  1886                           ;ShotTimer.c: 732: lcd_writeint(G_Minutes, 0);
+  1887  04BB  0823               	movf	_G_Minutes,w
+  1888  04BC  00E0               	movwf	?_lcd_writeint
+  1889  04BD  01E1               	clrf	?_lcd_writeint+1
+  1890  04BE  01E2               	clrf	?_lcd_writeint+2
+  1891  04BF  158A  26AE         	fcall	_lcd_writeint
+  1892                           ;ShotTimer.c: 733: lcd_puts(":");
+  1893  04C1  30D3               	movlw	low u159
+  1894  04C2  00E9               	movwf	?_lcd_puts
+  1895  04C3  3000               	movlw	high u159
+  1896  04C4  00EA               	movwf	?_lcd_puts+1
+  1897  04C5  158A  2697         	fcall	_lcd_puts
+  1898                           ;ShotTimer.c: 734: lcd_writeint((G_TickCount-G_
+      +                          Seconds)/1000000, 1);
+  1899  04C7  3040               	movlw	64
+  1900  04C8  00F4               	movwf	btemp+4
+  1901  04C9  3042               	movlw	66
+  1902  04CA  00F5               	movwf	btemp+5
+  1903  04CB  300F               	movlw	15
+  1904  04CC  00F6               	movwf	btemp+6
+  1905  04CD  01F7               	clrf	btemp+7
+  1906  04CE  0840               	movf	_G_Seconds,w
+  1907  04CF  0254               	subwf	_G_TickCount,w	;volatile
+  1908  04D0  00F0               	movwf	btemp
+  1909  04D1  0855               	movf	_G_TickCount+1,w	;volatile
+  1910  04D2  00F1               	movwf	btemp+1
+  1911  04D3  0841               	movf	_G_Seconds+1,w
+  1912  04D4  1C03               	btfss	3,0
+  1913  04D5  0F41               	incfsz	_G_Seconds+1,w
+  1914  04D6  02F1               	subwf	btemp+1
+  1915  04D7  0856               	movf	_G_TickCount+2,w	;volatile
+  1916  04D8  00F2               	movwf	btemp+2
+  1917  04D9  0842               	movf	_G_Seconds+2,w
+  1918  04DA  1C03               	btfss	3,0
+  1919  04DB  0F42               	incfsz	_G_Seconds+2,w
+  1920  04DC  02F2               	subwf	btemp+2
+  1921  04DD  0857               	movf	_G_TickCount+3,w	;volatile
+  1922  04DE  00F3               	movwf	btemp+3
+  1923  04DF  0843               	movf	_G_Seconds+3,w
+  1924  04E0  1C03               	btfss	3,0
+  1925  04E1  0F43               	incfsz	_G_Seconds+3,w
+  1926  04E2  02F3               	subwf	btemp+3
+  1927  04E3  118A  2775  118A   	fcall	lldiv
+  1928  04E6  0870               	movf	btemp,w
+  1929  04E7  00E0               	movwf	?_lcd_writeint
+  1930  04E8  0871               	movf	btemp+1,w
+  1931  04E9  00E1               	movwf	?_lcd_writeint+1
+  1932  04EA  01E2               	clrf	?_lcd_writeint+2
+  1933  04EB  0AE2               	incf	?_lcd_writeint+2
+  1934  04EC  2D7F               	goto	L25
+  1935                           ;ShotTimer.c: 735: }
+  1936  04ED                     l83
+  1937                           ;ShotTimer.c: 736: else
+  1938  04ED  118A  212A         	fcall	_lcd_clear
+  1939                           ;ShotTimer.c: 739: lcd_goto(0);
+  1940  04EF  3000               	movlw	0
+  1941  04F0  118A  2124         	fcall	_lcd_goto
+  1942                           ;ShotTimer.c: 740: lcd_puts("Shot ");
+  1943  04F2  30F9               	movlw	low u169
+  1944  04F3  00E9               	movwf	?_lcd_puts
+  1945  04F4  3000               	movlw	high u169
+  1946  04F5  00EA               	movwf	?_lcd_puts+1
+  1947  04F6  158A  2697         	fcall	_lcd_puts
+  1948                           ;ShotTimer.c: 741: lcd_writeint(G_Setting-(G_Ma
+      +                          xSetting), 0);
+  1949  04F8  1683               	bsf	3,5
+  1950  04F9  0820               	movf	_G_MaxSetting^(0+128),w
+  1951  04FA  0222               	subwf	_G_Setting^(0+128),w
+  1952  04FB  1283               	bcf	3,5
+  1953  04FC  00E0               	movwf	?_lcd_writeint
+  1954  04FD  01E1               	clrf	?_lcd_writeint+1
+  1955  04FE  1C03               	btfss	3,0
+  1956  04FF  03E1               	decf	?_lcd_writeint+1
+  1957  0500  01E2               	clrf	?_lcd_writeint+2
+  1958  0501  158A  26AE         	fcall	_lcd_writeint
+  1959                           ;ShotTimer.c: 742: lcd_puts(" MS/BPS");
+  1960  0503  3092               	movlw	low u179
+  1961  0504  00E9               	movwf	?_lcd_puts
+  1962  0505  3000               	movlw	high u179
+  1963  0506  00EA               	movwf	?_lcd_puts+1
+  1964  0507  158A  2697         	fcall	_lcd_puts
+  1965                           ;ShotTimer.c: 743: lcd_goto(0x40);
+  1966  0509  3040               	movlw	64
+  1967  050A  118A  2124         	fcall	_lcd_goto
+  1968                           ;ShotTimer.c: 744: lcd_puts("M:");
+  1969  050C  30CD               	movlw	low u189
+  1970  050D  00E9               	movwf	?_lcd_puts
+  1971  050E  3000               	movlw	high u189
+  1972  050F  00EA               	movwf	?_lcd_puts+1
+  1973  0510  158A  2697         	fcall	_lcd_puts
+  1974                           ;ShotTimer.c: 745: lcd_writefloat((float)(G_Sho
+      +                          tList[G_Setting-(G_MaxSetting+1)]/1000.0f));
+  1975  0512  01F3               	clrf	btemp+3
+  1976  0513  307A               	movlw	122
+  1977  0514  00F4               	movwf	btemp+4
+  1978  0515  3044               	movlw	68
+  1979  0516  00F5               	movwf	btemp+5
+  1980  0517  3003               	movlw	3
+  1981  0518  00F1               	movwf	btemp+1
+  1982  0519  1683               	bsf	3,5
+  1983  051A  0820               	movf	_G_MaxSetting^(0+128),w
+  1984  051B  0222               	subwf	_G_Setting^(0+128),w
+  1985  051C  118A  2133         	fcall	lbmul
+  1986  051E  3EFD               	addlw	-3
+  1987  051F  3EA3               	addlw	_G_ShotList
+  1988  0520  0084               	movwf	4
+  1989  0521  1383               	bcf	3,7
+  1990  0522  0800               	movf	0,w
+  1991  0523  00F0               	movwf	btemp
+  1992  0524  0A84               	incf	4
+  1993  0525  0800               	movf	0,w
+  1994  0526  00F1               	movwf	btemp+1
+  1995  0527  0A84               	incf	4
+  1996  0528  0800               	movf	0,w
+  1997  0529  00F2               	movwf	btemp+2
+  1998  052A  118A  267E         	fcall	ftdiv
+  1999  052C  0870               	movf	btemp,w
+  2000  052D  1283               	bcf	3,5
+  2001  052E  00DB               	movwf	?_lcd_writefloat
+  2002  052F  0871               	movf	btemp+1,w
+  2003  0530  00DC               	movwf	?_lcd_writefloat+1
+  2004  0531  0872               	movf	btemp+2,w
+  2005  0532  00DD               	movwf	?_lcd_writefloat+2
+  2006  0533  158A  27C3         	fcall	_lcd_writefloat
+  2007                           ;ShotTimer.c: 746: lcd_puts(" B:");
+  2008  0535  30D1               	movlw	low u199
+  2009  0536  00E9               	movwf	?_lcd_puts
+  2010  0537  3000               	movlw	high u199
+  2011  0538  00EA               	movwf	?_lcd_puts+1
+  2012  0539  158A  2697         	fcall	_lcd_puts
+  2013                           ;ShotTimer.c: 747: lcd_writefloat((float)(10000
+      +                          00.0f/G_ShotList[G_Setting-(G_MaxSetting+1)]));
+  2014  053B  3003               	movlw	3
+  2015  053C  00F1               	movwf	btemp+1
+  2016  053D  1683               	bsf	3,5
+  2017  053E  0820               	movf	_G_MaxSetting^(0+128),w
+  2018  053F  0222               	subwf	_G_Setting^(0+128),w
+  2019  0540  118A  2133         	fcall	lbmul
+  2020  0542  3EFD               	addlw	-3
+  2021  0543  3EA3               	addlw	_G_ShotList
+  2022  0544  0084               	movwf	4
+  2023  0545  1383               	bcf	3,7
+  2024  0546  0800               	movf	0,w
+  2025  0547  00F3               	movwf	btemp+3
+  2026  0548  0A84               	incf	4
+  2027  0549  0800               	movf	0,w
+  2028  054A  00F4               	movwf	btemp+4
+  2029  054B  0A84               	incf	4
+  2030  054C  0800               	movf	0,w
+  2031  054D  00F5               	movwf	btemp+5
+  2032  054E  3024               	movlw	36
+  2033  054F  00F0               	movwf	btemp
+  2034  0550  3074               	movlw	116
+  2035  0551  00F1               	movwf	btemp+1
+  2036  0552  3049               	movlw	73
+  2037  0553  00F2               	movwf	btemp+2
+  2038  0554  118A  267E         	fcall	ftdiv
+  2039  0556  0870               	movf	btemp,w
+  2040  0557  1283               	bcf	3,5
+  2041  0558                     L23
+  2042  0558  00DB               	movwf	?_lcd_writefloat
+  2043  0559  0871               	movf	btemp+1,w
+  2044  055A  00DC               	movwf	?_lcd_writefloat+1
+  2045  055B  0872               	movf	btemp+2,w
+  2046  055C  00DD               	movwf	?_lcd_writefloat+2
+  2047  055D  158A  27C3  118A   	fcall	_lcd_writefloat
+  2048                           ;ShotTimer.c: 748: }
+  2049  0560  2D82               	goto	l85
+  2050  0561                     l74
+  2051                           ;ShotTimer.c: 750: else if (G_Mode == 2)
+  2052  0561  0821               	movf	_G_Mode^(0+128),w
+  2053  0562  3A02               	xorlw	2
+  2054  0563  1D03               	btfss	3,2
+  2055  0564  2D82               	goto	l85
+  2056                           ;ShotTimer.c: 751: {
+  2057  0565  118A  212A         	fcall	_lcd_clear
+  2058                           ;ShotTimer.c: 753: lcd_goto(0);
+  2059  0567  3000               	movlw	0
+  2060  0568  118A  2124         	fcall	_lcd_goto
+  2061                           ;ShotTimer.c: 754: lcd_puts("Programming Mode")
+      +                          ;
+  2062  056A  307A               	movlw	low u209
+  2063  056B  00E9               	movwf	?_lcd_puts
+  2064  056C  3000               	movlw	high u209
+  2065  056D  00EA               	movwf	?_lcd_puts+1
+  2066  056E  158A  2697         	fcall	_lcd_puts
+  2067                           ;ShotTimer.c: 755: lcd_goto(0x40);
+  2068  0570  3040               	movlw	64
+  2069  0571  118A  2124         	fcall	_lcd_goto
+  2070                           ;ShotTimer.c: 756: lcd_puts("Mic Threshold:");
+  2071  0573  30B9               	movlw	low u219
+  2072  0574  00E9               	movwf	?_lcd_puts
+  2073  0575  3000               	movlw	high u219
+  2074  0576  00EA               	movwf	?_lcd_puts+1
+  2075  0577  158A  2697         	fcall	_lcd_puts
+  2076                           ;ShotTimer.c: 757: lcd_writeint(G_Setting, 0);
+  2077  0579  1683               	bsf	3,5
+  2078  057A  0822               	movf	_G_Setting^(0+128),w
+  2079  057B  1283               	bcf	3,5
+  2080  057C                     L24
+  2081  057C  00E0               	movwf	?_lcd_writeint
+  2082  057D  01E1               	clrf	?_lcd_writeint+1
+  2083  057E  01E2               	clrf	?_lcd_writeint+2
+  2084  057F                     L25
+  2085  057F  158A  26AE  118A   	fcall	_lcd_writeint
+  2086  0582                     l85
+  2087                           ;ShotTimer.c: 758: }
+  2088  0582  1283               	bcf	3,5
+  2089  0583  01A4               	clrf	_G_Refresh
+  2090  0584                     l73
+  2091                           ;ShotTimer.c: 760: }
+  2092  0584  138B               	bcf	11,7
+  2093                           ;ShotTimer.c: 764: if (G_TickCount > G_Last_Act
+      +                          ion+(1000000*60*30))
+  2094  0585  01F0               	clrf	btemp
+  2095  0586  30D2               	movlw	210
+  2096  0587  00F1               	movwf	btemp+1
+  2097  0588  3049               	movlw	73
+  2098  0589  00F2               	movwf	btemp+2
+  2099  058A  306B               	movlw	107
+  2100  058B  00F3               	movwf	btemp+3
+  2101  058C  0870               	movf	btemp,w
+  2102  058D  0734               	addwf	_G_Last_Action,w
+  2103  058E  00F4               	movwf	btemp+4
+  2104  058F  0835               	movf	_G_Last_Action+1,w
+  2105  0590  00F5               	movwf	btemp+5
+  2106  0591  0871               	movf	btemp+1,w
+  2107  0592  1803               	btfsc	3,0
+  2108  0593  0F71               	incfsz	btemp+1,w
+  2109  0594  07F5               	addwf	btemp+5
+  2110  0595  0836               	movf	_G_Last_Action+2,w
+  2111  0596  00F6               	movwf	btemp+6
+  2112  0597  0872               	movf	btemp+2,w
+  2113  0598  1803               	btfsc	3,0
+  2114  0599  0F72               	incfsz	btemp+2,w
+  2115  059A  07F6               	addwf	btemp+6
+  2116  059B  0837               	movf	_G_Last_Action+3,w
+  2117  059C  00F7               	movwf	btemp+7
+  2118  059D  0873               	movf	btemp+3,w
+  2119  059E  1803               	btfsc	3,0
+  2120  059F  0F73               	incfsz	btemp+3,w
+  2121  05A0  07F7               	addwf	btemp+7
+  2122  05A1  0857               	movf	_G_TickCount+3,w	;volatile
+  2123  05A2  0277               	subwf	btemp+7,w
+  2124  05A3  1D03               	btfss	3,2
+  2125  05A4  2DAF               	goto	u585
+  2126  05A5  0856               	movf	_G_TickCount+2,w	;volatile
+  2127  05A6  0276               	subwf	btemp+6,w
+  2128  05A7  1D03               	btfss	3,2
+  2129  05A8  2DAF               	goto	u585
+  2130  05A9  0855               	movf	_G_TickCount+1,w	;volatile
+  2131  05AA  0275               	subwf	btemp+5,w
+  2132  05AB  1D03               	btfss	3,2
+  2133  05AC  2DAF               	goto	u585
+  2134  05AD  0854               	movf	_G_TickCount,w	;volatile
+  2135  05AE  0274               	subwf	btemp+4,w
+  2136  05AF                     u585
+  2137                           ;ShotTimer.c: 765: {
+  2138  05AF  178B               	bsf	11,7
+  2139                           ;ShotTimer.c: 767: asm("nop");
+  2140  05B0  0000               	nop	;#
+  2141  05B1  1803               	btfsc	3,0
+  2142  05B2  2DC3               	goto	L33
+  2143                           ;ShotTimer.c: 769: (GIE = 0); G_Last_Action = G
+      +                          _TickCount; (GIE = 1); asm("nop");;
+  2144  05B3  138B               	bcf	11,7
+  2145  05B4  0854               	movf	_G_TickCount,w	;volatile
+  2146  05B5  00B4               	movwf	_G_Last_Action
+  2147  05B6  0855               	movf	_G_TickCount+1,w	;volatile
+  2148  05B7  00B5               	movwf	_G_Last_Action+1
+  2149  05B8  0856               	movf	_G_TickCount+2,w	;volatile
+  2150  05B9  00B6               	movwf	_G_Last_Action+2
+  2151  05BA  0857               	movf	_G_TickCount+3,w	;volatile
+  2152  05BB  00B7               	movwf	_G_Last_Action+3
+  2153  05BC  178B               	bsf	11,7
+  2154  05BD  0000               	nop	;#
+  2155                           ;ShotTimer.c: 771: ShutDown();
+  2156  05BE  118A  2193  118A   	fcall	_ShutDown
+  2157                           ;ShotTimer.c: 772: }
+  2158  05C1  178B               	bsf	11,7
+  2159                           ;ShotTimer.c: 774: asm("nop");
+  2160  05C2  0000               	nop	;#
+  2161  05C3                     L33
+  2162                           ;ShotTimer.c: 776: if ((G_Mode == 1) && RB2)
+  2163  05C3  1683               	bsf	3,5
+  2164  05C4  0B21               	decfsz	_G_Mode^(0+128),w
+  2165  05C5  2DCC               	goto	l88
+  2166  05C6  1283               	bcf	3,5
+  2167  05C7  1D06               	btfss	6,2
+  2168  05C8  2DCC               	goto	l88
+  2169                           ;ShotTimer.c: 777: CheckMic();
+  2170  05C9  158A  2542  118A   	fcall	_CheckMic
+  2171  05CC                     l88
+  2172                           ;ShotTimer.c: 779: asm("nop");
+  2173  05CC  0000               	nop	;#
+  2174  05CD  29F0               	goto	l42
+  2175                           
+  2176                           	psect	strings
+  2177  0050                     u29
+  2178  0050  3443               	retlw	67	;'C'
+  2179  0051  3468               	retlw	104	;'h'
+  2180  0052  3461               	retlw	97	;'a'
+  2181  0053  346E               	retlw	110	;'n'
+  2182  0054  3467               	retlw	103	;'g'
+  2183  0055  3465               	retlw	101	;'e'
+  2184  0056  3420               	retlw	32
+  2185  0057  3454               	retlw	84	;'T'
+  2186  0058  3468               	retlw	104	;'h'
+  2187  0059  3465               	retlw	101	;'e'
+  2188  005A  3420               	retlw	32
+  2189  005B  3442               	retlw	66	;'B'
+  2190  005C  3461               	retlw	97	;'a'
+  2191  005D  3474               	retlw	116	;'t'
+  2192  005E  3474               	retlw	116	;'t'
+  2193  005F  3465               	retlw	101	;'e'
+  2194  0060  3472               	retlw	114	;'r'
+  2195  0061  3479               	retlw	121	;'y'
+  2196  0062  3400               	retlw	0
+  2197  0063                     u129
+  2198  0063  3453               	retlw	83	;'S'
+  2199  0064  3468               	retlw	104	;'h'
+  2200  0065  346F               	retlw	111	;'o'
+  2201  0066  3474               	retlw	116	;'t'
+  2202  0067  3443               	retlw	67	;'C'
+  2203  0068  346F               	retlw	111	;'o'
+  2204  0069  3475               	retlw	117	;'u'
+  2205  006A  346E               	retlw	110	;'n'
+  2206  006B  3474               	retlw	116	;'t'
+  2207  006C  3465               	retlw	101	;'e'
+  2208  006D  3472               	retlw	114	;'r'
+  2209  006E  3400               	retlw	0
+  2210  006F                     u149
+  2211  006F  3447               	retlw	71	;'G'
+  2212  0070  3461               	retlw	97	;'a'
+  2213  0071  346D               	retlw	109	;'m'
+  2214  0072  3465               	retlw	101	;'e'
+  2215  0073  3420               	retlw	32
+  2216  0074  3454               	retlw	84	;'T'
+  2217  0075  3469               	retlw	105	;'i'
+  2218  0076  346D               	retlw	109	;'m'
+  2219  0077  3465               	retlw	101	;'e'
+  2220  0078  3472               	retlw	114	;'r'
+  2221  0079  3400               	retlw	0
+  2222  007A                     u209
+  2223  007A  3450               	retlw	80	;'P'
+  2224  007B  3472               	retlw	114	;'r'
+  2225  007C  346F               	retlw	111	;'o'
+  2226  007D  3467               	retlw	103	;'g'
+  2227  007E  3472               	retlw	114	;'r'
+  2228  007F  3461               	retlw	97	;'a'
+  2229  0080  346D               	retlw	109	;'m'
+  2230  0081  346D               	retlw	109	;'m'
+  2231  0082  3469               	retlw	105	;'i'
+  2232  0083  346E               	retlw	110	;'n'
+  2233  0084  3467               	retlw	103	;'g'
+  2234  0085  3420               	retlw	32
+  2235  0086  344D               	retlw	77	;'M'
+  2236  0087  346F               	retlw	111	;'o'
+  2237  0088  3464               	retlw	100	;'d'
+  2238  0089  3465               	retlw	101	;'e'
+  2239  008A  3400               	retlw	0
+  2240  008B                     u59
+  2241  008B  3446               	retlw	70	;'F'
+  2242  008C  3461               	retlw	97	;'a'
+  2243  008D  3473               	retlw	115	;'s'
+  2244  008E  3474               	retlw	116	;'t'
+  2245  008F  3465               	retlw	101	;'e'
+  2246  0090  3473               	retlw	115	;'s'
+  2247  0091  3474               	retlw	116	;'t'
+  2248  0092                     u179
+  2249  0092  3420               	retlw	32
+  2250  0093  344D               	retlw	77	;'M'
+  2251  0094  3453               	retlw	83	;'S'
+  2252  0095  342F               	retlw	47
+  2253  0096  3442               	retlw	66	;'B'
+  2254  0097  3450               	retlw	80	;'P'
+  2255  0098  3453               	retlw	83	;'S'
+  2256  0099  3400               	retlw	0
+  2257  009A                     u89
+  2258  009A  3453               	retlw	83	;'S'
+  2259  009B  346C               	retlw	108	;'l'
+  2260  009C  346F               	retlw	111	;'o'
+  2261  009D  3477               	retlw	119	;'w'
+  2262  009E  3465               	retlw	101	;'e'
+  2263  009F  3473               	retlw	115	;'s'
+  2264  00A0  3474               	retlw	116	;'t'
+  2265  00A1  3420               	retlw	32
+  2266  00A2  3442               	retlw	66	;'B'
+  2267  00A3  3450               	retlw	80	;'P'
+  2268  00A4  3453               	retlw	83	;'S'
+  2269  00A5  3400               	retlw	0
+  2270  00A6                     u109
+  2271  00A6  3441               	retlw	65	;'A'
+  2272  00A7  3476               	retlw	118	;'v'
+  2273  00A8  3465               	retlw	101	;'e'
+  2274  00A9  3472               	retlw	114	;'r'
+  2275  00AA  3461               	retlw	97	;'a'
+  2276  00AB  3467               	retlw	103	;'g'
+  2277  00AC  3465               	retlw	101	;'e'
+  2278  00AD  3420               	retlw	32
+  2279  00AE  3442               	retlw	66	;'B'
+  2280  00AF  3450               	retlw	80	;'P'
+  2281  00B0  3453               	retlw	83	;'S'
+  2282  00B1  3400               	retlw	0
+  2283  00B2                     u139
+  2284  00B2  3453               	retlw	83	;'S'
+  2285  00B3  3468               	retlw	104	;'h'
+  2286  00B4  346F               	retlw	111	;'o'
+  2287  00B5  3474               	retlw	116	;'t'
+  2288  00B6  3473               	retlw	115	;'s'
+  2289  00B7  343A               	retlw	58	;':'
+  2290  00B8  3400               	retlw	0
+  2291  00B9                     u219
+  2292  00B9  344D               	retlw	77	;'M'
+  2293  00BA  3469               	retlw	105	;'i'
+  2294  00BB  3463               	retlw	99	;'c'
+  2295  00BC  3420               	retlw	32
+  2296  00BD  3454               	retlw	84	;'T'
+  2297  00BE  3468               	retlw	104	;'h'
+  2298  00BF  3472               	retlw	114	;'r'
+  2299  00C0  3465               	retlw	101	;'e'
+  2300  00C1  3473               	retlw	115	;'s'
+  2301  00C2  3468               	retlw	104	;'h'
+  2302  00C3  346F               	retlw	111	;'o'
+  2303  00C4  346C               	retlw	108	;'l'
+  2304  00C5  3464               	retlw	100	;'d'
+  2305  00C6  343A               	retlw	58	;':'
+  2306  00C7  3400               	retlw	0
+  2307  00C8                     u119
+  2308  00C8                     u99
+  2309  00C8  3442               	retlw	66	;'B'
+  2310  00C9  3450               	retlw	80	;'P'
+  2311  00CA  3453               	retlw	83	;'S'
+  2312  00CB  343A               	retlw	58	;':'
+  2313  00CC  3400               	retlw	0
+  2314  00CD                     u189
+  2315  00CD                     u69
+  2316  00CD  344D               	retlw	77	;'M'
+  2317  00CE  343A               	retlw	58	;':'
+  2318  00CF  3400               	retlw	0
+  2319  00D0                     u79
+  2320  00D0  3420               	retlw	32
+  2321  00D1                     u199
+  2322  00D1  3420               	retlw	32
+  2323  00D2  3442               	retlw	66	;'B'
+  2324  00D3                     u159
+  2325  00D3  343A               	retlw	58	;':'
+  2326  00D4  3400               	retlw	0
+  2327  00D5                     u49
+  2328  00D5  3446               	retlw	70	;'F'
+  2329  00D6  3469               	retlw	105	;'i'
+  2330  00D7  3472               	retlw	114	;'r'
+  2331  00D8  346D               	retlw	109	;'m'
+  2332  00D9  3477               	retlw	119	;'w'
+  2333  00DA  3461               	retlw	97	;'a'
+  2334  00DB  3472               	retlw	114	;'r'
+  2335  00DC  3465               	retlw	101	;'e'
+  2336  00DD  343A               	retlw	58	;':'
+  2337  00DE  3420               	retlw	32
+  2338  00DF  3476               	retlw	118	;'v'
+  2339  00E0  3431               	retlw	49	;'1'
+  2340  00E1  342E               	retlw	46
+  2341  00E2  3432               	retlw	50	;'2'
+  2342  00E3  342E               	retlw	46
+  2343  00E4  3431               	retlw	49	;'1'
+  2344  00E5  3400               	retlw	0
+  2345  00E6                     u19
+  2346  00E6  344C               	retlw	76	;'L'
+  2347  00E7  346F               	retlw	111	;'o'
+  2348  00E8  3477               	retlw	119	;'w'
+  2349  00E9  3420               	retlw	32
+  2350  00EA  3442               	retlw	66	;'B'
+  2351  00EB  3461               	retlw	97	;'a'
+  2352  00EC  3474               	retlw	116	;'t'
+  2353  00ED  3474               	retlw	116	;'t'
+  2354  00EE  3465               	retlw	101	;'e'
+  2355  00EF  3472               	retlw	114	;'r'
+  2356  00F0  3479               	retlw	121	;'y'
+  2357  00F1  3420               	retlw	32
+  2358  00F2  342D               	retlw	45
+  2359  00F3  342D               	retlw	45
+  2360  00F4  342D               	retlw	45
+  2361  00F5  342D               	retlw	45
+  2362  00F6  342D               	retlw	45
+  2363  00F7  342D               	retlw	45
+  2364  00F8  3400               	retlw	0
+  2365  00F9                     u169
+  2366  00F9  3453               	retlw	83	;'S'
+  2367  00FA  3468               	retlw	104	;'h'
+  2368  00FB  346F               	retlw	111	;'o'
+  2369  00FC  3474               	retlw	116	;'t'
+  2370  00FD  3420               	retlw	32
+  2371  00FE  3400               	retlw	0
+  2372  00FF                     u39
+  2373  00FF  3420               	retlw	32
+  2374  0100  3420               	retlw	32
+  2375  0101  3453               	retlw	83	;'S'
+  2376  0102  3468               	retlw	104	;'h'
+  2377  0103  346F               	retlw	111	;'o'
+  2378  0104  3474               	retlw	116	;'t'
+  2379  0105  3454               	retlw	84	;'T'
+  2380  0106  3469               	retlw	105	;'i'
+  2381  0107  346D               	retlw	109	;'m'
+  2382  0108  3465               	retlw	101	;'e'
+  2383  0109  3472               	retlw	114	;'r'
+  2384  010A  3428               	retlw	40
+  2385  010B  3454               	retlw	84	;'T'
+  2386  010C  344D               	retlw	77	;'M'
+  2387  010D  3429               	retlw	41
+  2388  010E  3420               	retlw	32
+  2389  010F  3400               	retlw	0
+  2390  0000                     
+  2391  0000                     
+  2392  0000                     
+  2393  0000                     
+  2394  0000                     
+  2395  0000                     
+  2396  0000                     
+  2397  0000                     
+  2398  0000                     
+  2399  0000                     
+  2400  0000                     
+  2401  0000                     
+  2402  0000                     
+  2403  0000                     
+  2404  0000                     
+  2405  0000                     
+  2406  0000                     
+  2407  0000                     
+  2408  0000                     
+  2409  0000                     
+  2410  0000                     
+  2411  0000                     
+  2412  0000                     
+  2413  0000                     
+  2414  0000                     
+  2415  0000                     
+  2416  0000                     
+  2417  0000                     
+  2418  0000                     
+  2419  0000                     
+  2420  0000                     
+  2421  0000                     
+  2422  0000                     
+  2423  0000                     
+  2424  0000                     
+  2425  0000                     
+  2426  0000                     
+  2427  0000                     
+  2428  0000                     
+  2429  0000                     
+  2430  0000                     
+  2431  0000                     
+  2432  0000                     
+  2433  0000                     
+  2434  0000                     
+  2435  0000                     
+  2436  0000                     
+  2437  0000                     
+  2438  0000                     
+  2439  0000                     
+  2440  0000                     
+  2441  0000                     
+  2442  0000                     
+  2443  0000                     
+  2444  0000                     
+  2445  0000                     
+  2446  0000                     
+  2447  0000                     
+  2448  0000                     
+  2449  0000                     
+  2450  0000                     
+  2451  0000                     
+  2452  0000                     
+  2453  0000                     
+  2454  0000                     
+  2455  0000                     
+  2456  0000                     
+  2457  0000                     
+  2458  0000                     
+  2459  0000                     
+  2460  0000                     
+  2461  0000                     
+  2462  0000                     
+  2463  0000                     
+  2464  0000                     
+  2465  0000                     
+  2466  0000                     
+  2467  0000                     
+  2468  0000                     
+  2469  0000                     
+  2470  0000                     
+  2471  0000                     
+  2472  0000                     
+  2473  0000                     
+  2474  0000                     
+  2475  0000                     
+  2476  0000                     
+  2477  0000                     
+  2478  0000                     
+  2479  0000                     
+  2480  0000                     
+  2481  0000                     
+  2482  0000                     
+  2483  0000                     
+  2484  0000                     
+  2485  0000                     
+  2486  0000                     
+  2487  0000                     
+  2488  0000                     
+  2489  0000                     
+  2490  0000                     
+  2491  0000                     
+  2492  0000                     
+  2493  0000                     
+  2494  0000                     
+  2495  0000                     
+  2496  0000                     
+  2497  0000                     
+  2498  0000                     
+  2499  0000                     
+  2500  0000                     
+  2501  0000                     
+  2502  0000                     
+  2503  0000                     
+  2504  0000                     
+  2505  0000                     
+  2506  0000                     
+  2507  0000                     
+  2508  0000                     
+  2509  0000                     
+  2510  0000                     
+  2511  0000                     
+  2512  0000                     
+  2513  0000                     
+  2514  0000                     
+  2515  0000                     
+  2516  0000                     
+  2517  0000                     
+  2518  0000                     
+  2519  0000                     
+  2520  0000                     
+  2521  0000                     
+  2522  0000                     
+  2523  0000                     
+  2524  0000                     
+  2525  0000                     
+  2526  0000                     
+  2527  0000                     
+  2528  0000                     
+  2529  0000                     
+  2530  0000                     
+  2531  0000                     
+  2532  0000                     
+  2533  0000                     
+  2534  0000                     
+  2535  0000                     
+  2536  0000                     
+  2537  0000                     
+  2538  0000                     
+  2539  0000                     
+  2540  0000                     
+  2541  0000                     
+  2542  0000                     
+  2543  0000                     
+  2544  0000                     
+  2545  0000                     
+  2546  0000                     
+  2547  0000                     
+  2548  0000                     
+  2549  0000                     
+  2550  0000                     
+  2551  0000                     
+  2552  0000                     
+  2553  0000                     
+  2554  0000                     
+  2555  0000                     
+  2556  0000                     
+  2557  0000                     
+  2558  0000                     
+  2559  0000                     
+  2560  0000                     
+  2561  0000                     
+  2562  0000                     
+  2563  0000                     
+  2564  0000                     
+  2565  0000                     
+  2566  0000                     
+  2567  0000                     
+  2568  0000                     
+  2569  0000                     
+  2570  0000                     
+  2571  0000                     
+  2572  0000                     
+  2573  0000                     
+  2574  0000                     
+  2575  0000                     
+  2576  0000                     
+  2577                           
+  2578                           	psect	rbss_0
+  2579  0020                     F502
+  2580  0020                     	ds	1
+  2581  0000                     
+  2582  0000                     
+  2583  0000                     
+  2584  0000                     
+  2585  0000                     
+  2586  0000                     
+  2587  0000                     
+  2588  0000                     
+  2589  0000                     
+  2590  0000                     
+  2591  0000                     
+  2592  0000                     
+  2593  0000                     
+  2594  0000                     
+  2595  0000                     
+  2596  0000                     
+  2597  0000                     
+  2598  0021                     _G_HighShot
+  2599  0021                     	ds	1
+  2600  0022                     _G_LBI
+  2601  0022                     	ds	1
+  2602  0023                     _G_Minutes
+  2603  0023                     	ds	1
+  2604  0024                     _G_Refresh
+  2605  0024                     	ds	1
+  2606  0025                     _G_ShotDuration
+  2607  0025                     	ds	1
+  2608  0000                     
+  2609  0000                     
+  2610  0000                     
+  2611  0000                     
+  2612  0000                     
+  2613  0000                     
+  2614  0000                     
+  2615  0000                     
+  2616  0000                     
+  2617  0000                     
+  2618  0000                     
+  2619  0000                     
+  2620  0000                     
+  2621  0000                     
+  2622  0000                     
+  2623  0000                     
+  2624  0000                     
+  2625  0000                     
+  2626  0000                     
+  2627  0000                     
+  2628  0000                     
+  2629  0000                     
+  2630  0000                     
+  2631  0000                     
+  2632  0000                     
+  2633  0000                     
+  2634  0000                     
+  2635  0000                     
+  2636  0000                     
+  2637  0000                     
+  2638  0000                     
+  2639  0000                     
+  2640  0000                     
+  2641  0026                     _G_High
+  2642  0026                     	ds	2
+  2643  0028                     _G_Highest
+  2644  0028                     	ds	2
+  2645  002A                     _G_Idle
+  2646  002A                     	ds	2
+  2647  002C                     _G_Input
+  2648  002C                     	ds	2
+  2649  002E                     _G_Low
+  2650  002E                     	ds	2
+  2651  0030                     _G_ShotCount
+  2652  0030                     	ds	2
+  2653  0032                     _G_UHigh
+  2654  0032                     	ds	2
+  2655  0034                     _G_Last_Action
+  2656  0034                     	ds	4
+  2657  0038                     _G_PowerSW_FP
+  2658  0038                     	ds	4
+  2659  003C                     _G_Refresh_LastCheck
+  2660  003C                     	ds	4
+  2661  0040                     _G_Seconds
+  2662  0040                     	ds	4
+  2663  0044                     _G_Setting_Fastest
+  2664  0044                     	ds	4
+  2665  0048                     _G_Setting_Slowest
+  2666  0048                     	ds	4
+  2667  004C                     _G_ShotEnd
+  2668  004C                     	ds	4
+  2669  0050                     _G_ShotStart
+  2670  0050                     	ds	4
+  2671  0054                     _G_TickCount
+  2672  0054                     	ds	4
+  2673                           
+  2674                           	psect	rbss_1
+  2675  00A0                     _G_MaxSetting
+  2676  00A0                     	ds	1
+  2677  00A1                     _G_Mode
+  2678  00A1                     	ds	1
+  2679  00A2                     _G_Setting
+  2680  00A2                     	ds	1
+  2681  00A3                     _G_ShotList
+  2682  00A3                     	ds	75
+  2683                           
+  2684                           	psect	temp
+  2685  0070                     btemp
+  2686  0070                     	ds	8
+
+
+HI-TECH Software PICC Macro Assembler V9.50PL2
+Symbol Table                                          Wed Aug 12 00:09:07 2009
+
+          _G_Highest 0028           _G_HighShot 0021  
+             ?a_main 0058                    l1 001F  
+                  l2 001B                    l5 0E95  
+                  l9 0D86                   l11 0E4A  
+                 l30 0CB2                   l23 0C60  
+                 l15 0E01                   l32 0CD5  
+                 l24 0C62                   l16 0E2B  
+                 l33 0CE9                   l25 0D3E  
+                 l50 027D                   l42 01F0  
+                 l34 0D09                   l51 0222  
+                 l27 0CAC                   l19 0E88  
+                 l44 02D6                   l61 02E1  
+                 l45 0207                   l37 01A9  
+                 l70 03B5                   l55 0236  
+                 l47 029D                   l39 01AE  
+                 l72 03BB                   l64 0362  
+                 l48 028F                   l81 04A9  
+                 l73 0584                   l57 0254  
+                 l49 0214                   l74 0561  
+                 l66 03BA                   l83 04ED  
+                 l75 03FF                   l85 0582  
+                 l77 042F                   l79 048E  
+                 l88 05CC                   u19 00E6  
+                 u29 0050                   u45 0D80  
+                 u39 00FF                   u49 00D5  
+                 u59 008B                   u75 0D93  
+                 u69 00CD                   u79 00D0  
+                 u89 009A                   u99 00C8  
+          _G_Refresh 0024            _G_Minutes 0023  
+          _G_Seconds 0040                   fsr 0004  
+           _lcd_goto 0124            _G_ShotEnd 004C  
+           _lcd_puts 0E97                  F502 0020  
+          _G_Setting 00A2               _G_Idle 002A  
+             _G_High 0026               _G_Mode 00A1  
+     _G_ShotDuration 0025                  u140 0E23  
+                u109 00A6                  u125 0E1B  
+                u119 00C8                  u209 007A  
+                u129 0063                  u170 0E41  
+                u219 00B9                  u139 00B2  
+                u155 0E39                  _INT 000B  
+                u149 006F                  u405 0306  
+                u159 00D3                  u169 00F9  
+                u425 0351                  u185 0E50  
+                u179 0092                  u195 0E7C  
+                u189 00CD                  u199 00D1  
+                u375 0268                  u465 0394  
+                u385 02C8                  u490 03B3  
+                u475 03AB                  u585 05AF  
+          ?a_StartUp 005B            _lcd_clear 012A  
+      ?_lcd_writeint 0060           _G_ShotList 00A3  
+          _lcd_write 0F42              _G_UHigh 0032  
+               f2653 0063                 f2753 0058  
+            _G_Input 002C              _DelayMs 013F  
+       _G_MaxSetting 00A0                 _main 01E5  
+          ?_lcd_puts 0069          _G_TickCount 0054  
+       _eeprom_write 0173                 btemp 0070  
+               ftadd 064F                 ftdiv 067E  
+               lbmul 0133        _ResetSettings 0C11  
+               lldiv 0775                 lwmul 015E  
+               start 0028          _G_ShotCount 0030  
+             saved_w 007C       _lcd_writefloat 0FC3  
+        _G_ShotStart 0050              _StartUp 0C41  
+           int_entry 0004  _G_Refresh_LastCheck 003C  
+  _G_Setting_Fastest 0044                _G_LBI 0022  
+              _G_Low 002E        _G_Last_Action 0034  
+           _CheckMic 0D42         _lcd_writeint 0EAE  
+  _G_Setting_Slowest 0048          _eeprom_read 014C  
+        saved_pclath 006E                pclath 000A  
+        saved_status 006D                lltoft 071F  
+    ?_lcd_writefloat 005B                status 0003  
+            int_func 000B             _ShutDown 0193  
+       _G_PowerSW_FP 0038        ?_eeprom_write 005B  
+         int_restore 0023           used_btemp0 0001  
+         used_btemp1 0001           used_btemp2 0001  
+         used_btemp3 0001           used_btemp4 0001  
+         used_btemp5 0001           used_btemp6 0001  
+         used_btemp7 0001           ?a_CheckMic 005B  
