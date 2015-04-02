@@ -37,3 +37,9 @@
 *.lst
 *.rlf
 *.sdb
+*.hxl
+*.sym
+*.map
+*.lde
+*.mcw
+*.mcs
