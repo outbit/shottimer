@@ -30,3 +30,10 @@
 
 #c9.io
 .c9/
+
+# Other
+*.sdb
+*.cce
+*.lst
+*.rlf
+*.sdb
