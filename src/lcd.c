@@ -22,74 +22,61 @@
 
 void lcd_writeint(const WORD val, BYTE style)
 {
-	char str[6] = {0, 0, 0, 0, 0, 0};
+    char str[6] = {0, 0, 0, 0, 0, 0};
 
 
-	if (val < 1)
-	{
-		str[0] = 0+48;
-		if (style == STYLE_CLK)
-		{
-			str[1] = 0+48;
-		}
-	}
-	else if (val < 10)
-	{
-		if (style == STYLE_CLK)
-		{
-			str[0] = 0+48;
-			str[1] = (unsigned char)( val );
-			str[1] += 48;
-		}
-		else
-		{
-			str[0] = (unsigned char)( val );
+    if (val < 1) {
+        str[0] = 0+48;
+        if (style == STYLE_CLK) {
+            str[1] = 0+48;
+        }
+    } else if (val < 10) {
+        if (style == STYLE_CLK) {
+            str[0] = 0+48;
+            str[1] = (unsigned char)( val );
+            str[1] += 48;
+        } else {
+            str[0] = (unsigned char)( val );
 
-			str[0] += 48;
-		}
-	}
-	else if (val < 100)
-	{
-		str[0] = (unsigned char)( val/10 );
-		str[1] = (unsigned char)( val-(str[0]*10) );
+            str[0] += 48;
+        }
+    } else if (val < 100) {
+        str[0] = (unsigned char)( val/10 );
+        str[1] = (unsigned char)( val-(str[0]*10) );
 
-		str[0] += 48;
-		str[1] += 48;
-	}
-	else if (val < 1000)
-	{
-		str[0] = (unsigned char)( val/100 );
-		str[1] = (unsigned char)( (val-(str[0]*100))/10 );
-		str[2] = (unsigned char)( (val-((str[0]*100)+(str[1]*10))) );
+        str[0] += 48;
+        str[1] += 48;
+    } else if (val < 1000) {
+        str[0] = (unsigned char)( val/100 );
+        str[1] = (unsigned char)( (val-(str[0]*100))/10 );
+        str[2] = (unsigned char)( (val-((str[0]*100)+(str[1]*10))) );
 
-		str[0] += 48;
-		str[1] += 48;
-		str[2] += 48;
-	}
-	else
-	{
-		str[0] = '0';
-		str[1] = 0;
-		str[2] = 0;
-		str[3] = 0;
-		str[4] = 0;
-		str[5] = 0;
-		str[6] = 0;
-	}
-	lcd_puts(str);
+        str[0] += 48;
+        str[1] += 48;
+        str[2] += 48;
+    } else {
+        str[0] = '0';
+        str[1] = 0;
+        str[2] = 0;
+        str[3] = 0;
+        str[4] = 0;
+        str[5] = 0;
+        str[6] = 0;
+    }
+    lcd_puts(str);
 }
 
 void lcd_writefloat(const float num)
 {
-	BYTE ret;
-	unsigned char unum;
+    BYTE ret;
+    unsigned char unum;
 
-	unum = (unsigned char)( num );
-	ret = (BYTE) ( (num-unum)*DECIMALAC );
+    unum = (unsigned char)( num );
+    ret = (BYTE) ( (num-unum)*DECIMALAC );
 
-	lcd_writeint((BYTE)num, STYLE_STD);
-	lcd_write('.');
-	lcd_writeint((BYTE)ret, STYLE_STD);
+    lcd_writeint((BYTE)num, STYLE_STD);
+    lcd_write('.');
+    lcd_writeint((BYTE)ret, STYLE_STD);
 }
 
 
@@ -98,17 +85,17 @@ void lcd_writefloat(const float num)
 void
 lcd_write(unsigned char c)
 {
-	DelayUs(40);
-	RB7 = ((c & 0b10000000) >> 7);
-	RB6 = ((c & 0b01000000) >> 6);
-	RB5 = ((c & 0b00100000) >> 5);
-	RB4 = ((c & 0b00010000) >> 4);
-	LCD_STROBE();
-	RB7 = ((c & 0b00001000) >> 3);
-	RB6 = ((c & 0b00000100) >> 2);
-	RB5 = ((c & 0b00000010) >> 1);
-	RB4 = ((c & 0b00000001)         );
-	LCD_STROBE();
+    DelayUs(40);
+    RB7 = ((c & 0b10000000) >> 7);
+    RB6 = ((c & 0b01000000) >> 6);
+    RB5 = ((c & 0b00100000) >> 5);
+    RB4 = ((c & 0b00010000) >> 4);
+    LCD_STROBE();
+    RB7 = ((c & 0b00001000) >> 3);
+    RB6 = ((c & 0b00000100) >> 2);
+    RB5 = ((c & 0b00000010) >> 1);
+    RB4 = ((c & 0b00000001)         );
+    LCD_STROBE();
 }
 
 /*
@@ -118,9 +105,9 @@ lcd_write(unsigned char c)
 void
 lcd_clear(void)
 {
-	LCD_RS = 0;
-	lcd_write(0x1);
-	DelayMs(2);
+    LCD_RS = 0;
+    lcd_write(0x1);
+    DelayMs(2);
 }
 
 /* write a string of chars to the LCD */
@@ -128,9 +115,9 @@ lcd_clear(void)
 void
 lcd_puts(const char * s)
 {
-	LCD_RS = 1;     // write characters
-	while(*s)
-		lcd_write(*s++);
+    LCD_RS = 1;     // write characters
+    while(*s)
+        lcd_write(*s++);
 }
 
 /* write one character to the LCD */
@@ -138,8 +125,8 @@ lcd_puts(const char * s)
 void
 lcd_putch(char c)
 {
-	LCD_RS = 1;     // write characters
-	lcd_write( c );
+    LCD_RS = 1;     // write characters
+    lcd_write( c );
 }
 
 
@@ -150,8 +137,8 @@ lcd_putch(char c)
 void
 lcd_goto(unsigned char pos)
 {
-	LCD_RS = 0;
-	lcd_write(0x80+pos);
+    LCD_RS = 0;
+    lcd_write(0x80+pos);
 }
 
 /* initialise the LCD - put into 4 bit mode */
