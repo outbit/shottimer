@@ -45,3 +45,4 @@
 *.mcs
 *.cof
 *.mcs
+/ShotTimer.X/nbproject/private/
