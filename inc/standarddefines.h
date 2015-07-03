@@ -3,8 +3,8 @@
    standarddefines.h
    ----------------------
    Created: 04/10/06
-   Updated: 06/27/06
-   Version: 1.2.1
+   Updated: 07/03/15
+   Version: 1.3.0
    ----------------------
    Compiler: PICC 9.40 C Compiler From HI-TECH
    Assembler: PICC 9.40 Assembler From HI-TECH
@@ -12,19 +12,28 @@
    IDE: MPLAB IDE v6.62
    ----------------------
    Author: David Lee Whiteside
-   Company: Hyperformance Paintball LLC
    Project: ShotTimer(TM)
    Target MCU: PIC16F88 From Microchip
    ----------------------
-   The ShotTimer(TM) software is (C) 2004-2009 Whiteside Solutions LLC.
-   This program is free software; you may redistribute and/or modify it
-   under the terms of the GNU General Public License as published by the
-   Free Software Foundation; Version 3.
+   Copyright (c) 2004-2015 David Whiteside
 
-   This program is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   General Public License v3.0 for more details at http://www.gnu.org/licenses/gpl-3.0.html
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
+
+   The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
  */
 #ifndef _STANDARD_DEFINES_H_
 #define  _STANDARD_DEFINES_H_
