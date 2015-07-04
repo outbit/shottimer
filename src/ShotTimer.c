@@ -172,9 +172,9 @@ void CheckMic(void)
     DWORD rof;
 
     ADC_DELAY();
-    ADGO = 1;
+    ADCON0 |= 0b00000100; // set ADGO = 1
     ADC_DELAY();
-    while (ADGO == 1) NOP();
+    while (ADCON0&0b00000100 == 0b00000100) NOP(); // Loop while (ADGO == 1) NOP();
     ADC_DELAY();
 
     G_Input = ( ADRESL | (ADRESH<<8) );
@@ -273,12 +273,12 @@ void StartUp(void)
 
 // Port Setup
     DI();
-    TRISB = 0b00000011;             // 2 Switch Inputs
-    TRISA = 0b00000001;             // 1 Analog Input
-    PORTB = 0b00000000;     // PortB Settings
-    PORTA = 0b00000000;             // PortA Settings
-    OUT_MICPOWER = 1;               // Power The Microphone
-    OPTION =        0b00001000;     // RBPU | INTEDG | T0CS | *PSA | PS2 | PS1 | PS0
+    TRISB = 0b00000011;         // 2 Switch Inputs
+    TRISA = 0b00000001;         // 1 Analog Input
+    PORTB = 0b00000000;         // PortB Settings
+    PORTA = 0b00000000;         // PortA Settings
+    OUT_MICPOWER = 1;           // Power The Microphone
+    OPTION_REG =    0b00001000; // RBPU | INTEDG | T0CS | *PSA | PS2 | PS1 | PS0
     ADCON0 =        0b00000001; // ADCS1 | ADCS0 | CHS2 | CHS1 | CHS0 | GO/DONE | N | *ADON
     ADCON1 =        0b00001110; // ADFM | ADCS2 | VCFG1 | VCFG0 | N | N | N | N
     OSCCON =        0b01100000; // N | *IRCF2 | *IRCF1 | IRCF0 | N | IOFS | N | N
@@ -293,7 +293,7 @@ void StartUp(void)
 
     if (G_Mode == MODE_SLEEP) {
         ADC_DELAY();
-        ADGO = 1; // Start Conversion
+        ADCON0 |= 0b00000100; // Set ADGO = 1, Start Conversion
 
         // Done With Initial Bootup
         ResetSettings();
@@ -407,7 +407,7 @@ void ShutDown(void)
 
 // Port Setup
     DI();
-    OPTION =        0b00001000;     // RBPU | INTEDG | T0CS | *PSA | PS2 | PS1 | PS0
+    OPTION_REG =        0b00001000;     // RBPU | INTEDG | T0CS | *PSA | PS2 | PS1 | PS0
     ADCON0 =        0b00000000; // ADCS1 | ADCS0 | CHS2 | CHS1 | CHS0 | GO/DONE | N | ADON
     ADCON1 =        0b00000000; // ADFM | ADCS2 | VCFG1 | VCFG0 | N | N | N | N
     OSCCON =        0b00000001;     // N | IRCF2 | IRCF1 | IRCF0 | N | IOFS | SCS1 | SCS0 (TESTING)
@@ -451,7 +451,7 @@ void ShutDown(void)
 
 // test 4
     INTEDG = 0; // Interrupt When They Press A Button
-    RBPU = 0; // Enable PortB Internal Pullup Before Going To Sleep
+//    RBPU = 0; // Enable PortB Internal Pullup Before Going To Sleep
 //TRISB = 0x01;
 //TRISA = 0x00;
     PORTB = 0x01;
@@ -474,7 +474,7 @@ void ShutDown(void)
     DelayMs(255); // TESTING
     DelayMs(255); // TESTING
 
-    RBPU = 0; // Enable PortB Internal Pullup Before Going To Sleep
+ //   RBPU = 0; Duplicate of OPTION_REG above // Enable PortB Internal Pullup Before Going To Sleep
     PEIE = 0; // Disable Perifial Until StartUp
 
     G_Mode = MODE_SLEEP;

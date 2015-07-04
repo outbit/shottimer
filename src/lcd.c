@@ -61,7 +61,7 @@ void lcd_writeint(const WORD val, BYTE style)
         str[3] = 0;
         str[4] = 0;
         str[5] = 0;
-        str[6] = 0;
+//        str[6] = 0; How was this bug never found???
     }
     lcd_puts(str);
 }
