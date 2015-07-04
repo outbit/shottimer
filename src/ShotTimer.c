@@ -163,7 +163,7 @@ void ResetSettings(void)
 }
 
 
-/* @Desc: Check The Microphone, Analog Ditial Conversion Routine
+/* @Desc: Check The Microphone, Analog Digital Conversion Routine
    @Return:
  */
 void CheckMic(void)
