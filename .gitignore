@@ -46,3 +46,6 @@
 *.cof
 *.mcs
 /ShotTimer.X/nbproject/private/
+/ShotTimer.X/build/default/
+/ShotTimer.X/dist/default/
+
