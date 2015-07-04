@@ -35,7 +35,7 @@ extern void lcd_goto(unsigned char pos);
 
 //extern void lcd_init(void);
 
-extern void lcd_putch(char);
+//extern void lcd_putch(char);
 
 /*	Set the cursor position */
 

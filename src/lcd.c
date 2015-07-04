@@ -1,4 +1,3 @@
-
 /*
  *	LCD interface example
  *	Uses routines from delay.c
@@ -23,7 +22,6 @@
 void lcd_writeint(const WORD val, BYTE style)
 {
     char str[6] = {0, 0, 0, 0, 0, 0};
-
 
     if (val < 1) {
         str[0] = 0+48;
@@ -79,9 +77,7 @@ void lcd_writefloat(const float num)
     lcd_writeint((BYTE)ret, STYLE_STD);
 }
 
-
 /* write a byte to the LCD in 4 bit mode */
-
 void
 lcd_write(unsigned char c)
 {
@@ -101,7 +97,6 @@ lcd_write(unsigned char c)
 /*
  *      Clear and home the LCD
  */
-
 void
 lcd_clear(void)
 {
@@ -111,7 +106,6 @@ lcd_clear(void)
 }
 
 /* write a string of chars to the LCD */
-
 void
 lcd_puts(const char * s)
 {
@@ -121,19 +115,17 @@ lcd_puts(const char * s)
 }
 
 /* write one character to the LCD */
-
-void
+/*void
 lcd_putch(char c)
 {
     LCD_RS = 1;     // write characters
     lcd_write( c );
-}
+}*/
 
 
 /*
  * Go to the specified position
  */
-
 void
 lcd_goto(unsigned char pos)
 {

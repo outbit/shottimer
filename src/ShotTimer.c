@@ -53,12 +53,12 @@ __CONFIG( HS & WDTDIS & PWRTDIS & BORDIS & LVPDIS & DEBUGDIS & PROTECT & MCLRDIS
 
 // Microphone Settings
 #define ADC_DELAY() NOP(); NOP(); NOP(); NOP(); NOP();  NOP(); NOP(); NOP(); NOP(); NOP();  NOP(); NOP(); NOP(); NOP(); NOP();
-#define STARTING_SOUND 2400
-#define DEFAULT_SOUND 200
-#define INC_SOUND 100
-#define MIN_SOUND 100
-#define LESSTHAN_SOUND 400 //200
-#define MAXTHAN_SOUND 350
+#define STARTING_SOUND  2400
+#define DEFAULT_SOUND   200
+#define INC_SOUND       100
+#define MIN_SOUND       100
+#define LESSTHAN_SOUND  400
+#define MAXTHAN_SOUND   350
 
 // Modes
 #define MODE_SLEEP      0
@@ -66,8 +66,8 @@ __CONFIG( HS & WDTDIS & PWRTDIS & BORDIS & LVPDIS & DEBUGDIS & PROTECT & MCLRDIS
 #define MODE_PROG       2
 
 // Port Info
-#define IN_POWERSW              RB0
-#define IN_FUNCSW               RB1
+#define IN_POWERSW      RB0
+#define IN_FUNCSW       RB1
 #define OUT_LBIPOWER    RB3
 #define OUT_MICPOWER    RB2
 #define OUT_LCDPOWER    RA2
@@ -78,37 +78,37 @@ __CONFIG( HS & WDTDIS & PWRTDIS & BORDIS & LVPDIS & DEBUGDIS & PROTECT & MCLRDIS
 #define HALF_SECOND (TICK_SECOND/2)
 
 // Read/Write Volatile
-volatile DWORD G_TickCount;                     // Timer In Microseconds
+volatile static DWORD G_TickCount;                     // Timer In Microseconds
 
-DWORD G_Last_Action;
-DWORD G_PowerSW_FP;
+static DWORD G_Last_Action;
+static DWORD G_PowerSW_FP;
 
-bank1 BYTE G_Setting;
-bank1 BYTE G_MaxSetting;
+bank1 static BYTE G_Setting;
+bank1 static BYTE G_MaxSetting;
 
-bank1 BYTE G_Mode;
+bank1 static BYTE G_Mode;
 
-DWORD G_Seconds;
-BYTE G_Minutes;
+static DWORD G_Seconds;
+static BYTE G_Minutes;
 
-WORD G_Input;
-BOOL G_ShotDuration;
-DWORD G_ShotStart, G_ShotEnd;
-WORD G_ShotCount;
-WORD G_Highest;
-BOOL G_Refresh;
-DWORD G_Refresh_LastCheck;
-DWORD G_Setting_Fastest;
-DWORD G_Setting_Slowest;
-WORD G_High;
-WORD G_Low;
-WORD G_Idle;
-WORD G_UHigh;
-BOOL G_HighShot;
+static WORD G_Input;
+static BOOL G_ShotDuration;
+static DWORD G_ShotStart, G_ShotEnd;
+static WORD G_ShotCount;
+static WORD G_Highest;
+static BOOL G_Refresh;
+static DWORD G_Refresh_LastCheck;
+static DWORD G_Setting_Fastest;
+static DWORD G_Setting_Slowest;
+static WORD G_High;
+static WORD G_Low;
+static WORD G_Idle;
+static WORD G_UHigh;
+static BOOL G_HighShot;
 
-BOOL G_LBI;
+static BOOL G_LBI;
 
-bank1 float G_ShotList[25];
+bank1 static float G_ShotList[25];
 
 
 /* @Desc: Interrupt
@@ -138,7 +138,7 @@ void interrupt INT(void)
 /* @Desc: Reset All Of The Timing Values
    @Return:
  */
-void ResetSettings(void)
+inline void ResetSettings(void)
 {
     DI();
     G_Setting_Fastest = 0;
@@ -166,7 +166,7 @@ void ResetSettings(void)
 /* @Desc: Check The Microphone, Analog Digital Conversion Routine
    @Return:
  */
-void CheckMic(void)
+inline void CheckMic(void)
 {
     DWORD endtime;
     DWORD rof;
@@ -223,7 +223,7 @@ void CheckMic(void)
                     EI();
                     NOP();
                     G_ShotDuration = FALSE;
-                    G_ShotCount++;
+                    ++G_ShotCount;
                     G_Refresh = TRUE;
                     DI();
                 }
@@ -418,42 +418,7 @@ void ShutDown(void)
     CVRCON =        0b00000000;
     CMCON =         0b00000111;
 
-    /* test 1
-       PORTB = 0x01;
-       PORTA = 0x00;
-       DelayMs(50); //testing
-     */
-
-// test 2
-    /*
-       TRISB = 0x01;
-       TRISA = 0x00;
-       PORTB = 0x01;
-       PORTA = 0x00;
-       DelayMs(50); //testing
-       TRISA1 = 1; // Set LBI Input Pin As a Input
-
-       INTEDG = 0; // Interrupt When They Press A Button
-       RBPU = 0; // enable //1;	// Disable PortB Internal Pullup Before Going To Sleep
-     */
-
-// test 3
-    /*
-       INTEDG = 0; // Interrupt When They Press A Button
-       RBPU = 0;	// Enable PortB Internal Pullup Before Going To Sleep
-       TRISB = 0x01;
-       TRISA = 0x00;
-       PORTB = 0x01;
-       PORTA = 0x00;
-       DelayMs(50); //testing
-       TRISA1 = 1; // Set LBI Input Pin As a Input
-     */
-
-// test 4
     INTEDG = 0; // Interrupt When They Press A Button
-//    RBPU = 0; // Enable PortB Internal Pullup Before Going To Sleep
-//TRISB = 0x01;
-//TRISA = 0x00;
     PORTB = 0x01;
     PORTA = 0x00;
     DelayMs(50); //testing
@@ -481,7 +446,7 @@ void ShutDown(void)
 }
 
 
-/* @Desc: MAIN!!!!
+/* @Desc: Entry point for program
    @Return: 0 If Successful
  */
 void main()
@@ -618,7 +583,7 @@ void main()
             if (!funcpress) {
                 funcpress = 1;
 
-                G_Setting++;
+                ++G_Setting;
 
                 if (G_ShotCount) {
                     if ((G_Setting > G_MaxSetting+(G_ShotCount-1)) || G_Setting > G_MaxSetting+25)
@@ -634,7 +599,7 @@ void main()
             funcpress = 0;
         }
 
-
+        
         if (G_Refresh) {
             if (G_Mode == MODE_ON) {
                 if (G_Setting == 1) {
@@ -643,23 +608,23 @@ void main()
                     lcd_puts("Fastest MS/BPS");
                     lcd_goto(0x40); // Select second line
                     lcd_puts("M:");
-                    lcd_writefloat((float)(G_Setting_Fastest/1000.0f));
+                    lcd_writeint((BYTE)(G_Setting_Fastest/1000), STYLE_STD);
                     lcd_puts("  B:");
-                    lcd_writefloat((float)(1000000.0f/G_Setting_Fastest));
+                    lcd_writeint((BYTE)(1000000/G_Setting_Fastest), STYLE_STD);
                 } else if (G_Setting == 2) {
                     lcd_clear();
                     lcd_goto(0);    // select first line
                     lcd_puts("Slowest BPS");
                     lcd_goto(0x40); // Select second line
                     lcd_puts("BPS:");
-                    lcd_writefloat((float)(1000000.0f/G_Setting_Slowest));
+                    lcd_writeint((BYTE)(1000000/G_Setting_Slowest), STYLE_STD);
                 } else if (G_Setting == 3) {
                     lcd_clear();
                     lcd_goto(0);    // select first line
                     lcd_puts("Average BPS");
                     lcd_goto(0x40); // Select second line
                     lcd_puts("BPS:");
-                    lcd_writefloat((float)(((1000000.0f/G_Setting_Fastest)+(1000000.0f/G_Setting_Slowest))/2));
+                    lcd_writeint((BYTE)(((1000000/G_Setting_Fastest)+(1000000/G_Setting_Slowest))/2), STYLE_STD);
                 } else if (G_Setting == 4) {
                     lcd_clear();
                     lcd_goto(0);    // select first line
@@ -682,10 +647,12 @@ void main()
                     lcd_writeint(G_Setting-(G_MaxSetting), STYLE_STD);
                     lcd_puts(" MS/BPS");
                     lcd_goto(0x40); // Select second line
-                    lcd_puts("M:");
-                    lcd_writefloat((float)(G_ShotList[G_Setting-(G_MaxSetting+1)]/1000.0f));
+                    // Not enough Program space to support MS
+                    //lcd_puts("M:");
+                    //lcd_writeint((BYTE)(G_ShotList[G_Setting-(G_MaxSetting+1)]/1000), STYLE_STD);
+                    // END of MS line
                     lcd_puts(" B:");
-                    lcd_writefloat((float)(1000000.0f/G_ShotList[G_Setting-(G_MaxSetting+1)]));
+                    lcd_writeint((BYTE)(1000000/G_ShotList[G_Setting-(G_MaxSetting+1)]), STYLE_STD);
                 }
             } else if (G_Mode == MODE_PROG) {
                 lcd_clear();

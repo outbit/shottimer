@@ -38,15 +38,16 @@
 #ifndef _STANDARD_DEFINES_H_
 #define  _STANDARD_DEFINES_H_
 
-#define LBI // For Low Battery Indicator
+//#define LBI // For Low Battery Indicator
 #define XTAL_FREQ 12MHZ // 12mhz Oscillator
-#define VER 0x04
-#define LCD_VER "Firmware: v1.2.1"
+#define VER 0x05
+#define LCD_VER "Firmware: v1.3.0"
 /*
    0x01 - Version 1.0 - interrupt based microphone
    0x02 - Version 1.1 - 4mhz oscillator, lbi added
    0x03 - Version 1.2 - 12 mhz oscillator
    0x04 - Version 1.2.1 - First Released
+   0x05 - Version 1.3.0 - First Release compiled with free microchip c
  */
 
 // Standard Defines
