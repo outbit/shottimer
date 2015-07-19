@@ -1,1 +1,3 @@
 language: cpp
+before_install:
+  - ./travis-install-microchipc.sh
