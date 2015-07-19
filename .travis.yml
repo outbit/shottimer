@@ -1,5 +1,4 @@
 language: c
-# sudo: required
 before_install:
-  - ./travis-install-microchipc.sh
+  - ./travis-install-deps.sh
 script: make test
