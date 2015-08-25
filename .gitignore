@@ -28,7 +28,7 @@
 *.x86_64
 *.hex
 
-#c9.io
+# c9.io
 .c9/
 
 # Other
@@ -49,5 +49,5 @@
 /ShotTimer.X/build/default/
 /ShotTimer.X/dist/default/
 
-#KiCad
+# KiCad
 *.bak
