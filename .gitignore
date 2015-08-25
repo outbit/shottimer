@@ -49,3 +49,5 @@
 /ShotTimer.X/build/default/
 /ShotTimer.X/dist/default/
 
+#KiCad
+*.bak
