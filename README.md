@@ -7,3 +7,8 @@ License
 =====
 
 shottimer is released under the [MIT License](LICENSE.md)
+
+Author
+=====
+
+David Whiteside (<david@davidwhiteside.com>)
